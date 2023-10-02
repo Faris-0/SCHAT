@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="@dimen/_275sdp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="@dimen/_8sdp"
+    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:id="@+id/sLSign"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/_15sdp"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome to SCHAT"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/_14ssp"
+            android:textStyle="bold"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Simple App to Chat with Others"
+            android:textColor="@color/gray"
+            android:textSize="@dimen/_13ssp"
+            android:layout_gravity="center" />
+
+        <LinearLayout
+            android:id="@+id/sSignIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_30sdp"
+            android:gravity="center"
+            android:padding="@dimen/_5sdp"
+            android:background="@drawable/bg_button_1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign In"
+                android:textSize="@dimen/_13ssp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:gravity="center"
+            android:padding="@dimen/_5sdp"
+            android:background="@drawable/bg_button_1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sign Up"
+                android:textSize="@dimen/_13ssp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sLSignInUp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/_15sdp"
+        android:visibility="gone"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/_15sdp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/sBack"
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:background="@drawable/bg_button_3"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
+                    android:src="@drawable/ic_arrow"
+                    android:rotation="180"
+                    android:tint="@color/gray" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/sTSignInUp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_15sdp"
+                android:text="Sign In / Sign Up"
+                android:textSize="@dimen/_15ssp"
+                android:textColor="@color/gray"
+                android:textStyle="bold"
+                android:layout_gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sLName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/_8sdp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="@dimen/_25sdp"
+                    android:layout_height="@dimen/_25sdp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="@dimen/_17sdp"
+                        android:layout_height="@dimen/_17sdp"
+                        android:src="@drawable/ic_user" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/sEName"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_25sdp"
+                    android:paddingHorizontal="@dimen/_8sdp"
+                    android:hint="Name"
+                    android:textColorHint="@color/light_gray"
+                    android:textSize="@dimen/_12ssp"
+                    android:textColor="@color/gray"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_1sdp"
+                android:background="@color/gray" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
+                    android:src="@drawable/ic_user" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/sEUsername"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_25sdp"
+                android:paddingHorizontal="@dimen/_8sdp"
+                android:hint="Username"
+                android:textColorHint="@color/light_gray"
+                android:textSize="@dimen/_12ssp"
+                android:textColor="@color/gray"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_1sdp"
+            android:background="@color/gray" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_8sdp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="@dimen/_25sdp"
+                android:layout_height="@dimen/_25sdp"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="@dimen/_17sdp"
+                    android:layout_height="@dimen/_17sdp"
+                    android:src="@drawable/ic_lock" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/sEPassword"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_25sdp"
+                android:paddingHorizontal="@dimen/_8sdp"
+                android:hint="Password"
+                android:textColorHint="@color/light_gray"
+                android:textSize="@dimen/_12ssp"
+                android:textColor="@color/gray"
+                android:gravity="center_vertical"
+                android:singleLine="true"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_1sdp"
+            android:background="@color/gray" />
+
+        <LinearLayout
+            android:id="@+id/sLLogInReg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:gravity="center"
+            android:padding="@dimen/_5sdp"
+            android:background="@drawable/bg_button_1">
+
+            <TextView
+                android:id="@+id/sTLogInReg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Login / Register"
+                android:textSize="@dimen/_13ssp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

@@ -17,10 +17,10 @@
         <LinearLayout
             android:id="@+id/mMenu"
             android:layout_width="@dimen/_35sdp"
-            android:layout_height="@dimen/_35sdp"
+            android:layout_height="@dimen/_45sdp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/bg_button_1">
+            android:background="@drawable/bg_button_2">
 
             <ImageView
                 android:layout_width="@dimen/_17sdp"
@@ -44,10 +44,10 @@
         <LinearLayout
             android:id="@+id/mFind"
             android:layout_width="@dimen/_35sdp"
-            android:layout_height="@dimen/_35sdp"
+            android:layout_height="@dimen/_45sdp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/bg_button_1">
+            android:background="@drawable/bg_button_2">
 
             <ImageView
                 android:layout_width="@dimen/_17sdp"
