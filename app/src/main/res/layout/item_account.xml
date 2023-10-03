@@ -8,16 +8,17 @@
     android:background="@drawable/bg_button_4">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/mAvatar"
+        android:id="@+id/aPhoto"
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
         android:src="@drawable/avatar" />
 
     <TextView
+        android:id="@+id/aName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
-        android:text="Nama Pengguna"
+        android:text="Name"
         android:textSize="@dimen/_12ssp"
         android:textColor="@color/gray"
         android:maxLines="1"

@@ -1,25 +1,40 @@
 package com.yuuna.schat;
 
+import static com.yuuna.schat.util.SharedPref.ACC;
+import static com.yuuna.schat.util.SharedPref.KEY;
+import static com.yuuna.schat.util.SharedPref.NAME;
 import static com.yuuna.schat.util.SharedPref.SCHAT;
 import static com.yuuna.schat.util.SharedPref.SIGN;
+import static com.yuuna.schat.util.SharedPref.TAG;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import com.yuuna.schat.adapter.AccountAdapter;
 import com.yuuna.schat.util.Client;
 
 import org.json.JSONArray;
@@ -28,11 +43,19 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
-    private Dialog dMenu, dSign;
+    private EditText etUsername;
 
+    private Context context;
+    private Dialog dMenu, dSign;
+    private SharedPreferences spSCHAT;
+
+    private ArrayList<JSONObject> jsonObjectArrayList;
+
+    private String dataAcc;
     private Boolean isAccount = false, isSign;
 
     @Override
@@ -42,18 +65,39 @@ public class MainActivity extends Activity {
 
         findViewById(R.id.mMenu).setOnClickListener(v -> menuDialog());
 
-        isSign = getSharedPreferences(SCHAT, MODE_PRIVATE).getBoolean(SIGN, false);
+        context = MainActivity.this;
+
+        spSCHAT = getSharedPreferences(SCHAT, MODE_PRIVATE);
+        isSign = spSCHAT.getBoolean(SIGN, false);
         if (!isSign) sign();
+        loadAcc();
     }
 
     private void menuDialog() {
         // Dialog Menu
-        dMenu = new Dialog(this);
+        dMenu = new Dialog(context);
         dMenu.setContentView(R.layout.dialog_menu);
         dMenu.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        dMenu.findViewById(R.id.mAkun).setOnClickListener(v -> {
+        TextView tvName, tvTag;
+        tvName = dMenu.findViewById(R.id.mName);
+        tvTag = dMenu.findViewById(R.id.mTag);
+
+        tvName.setText(spSCHAT.getString(NAME, ""));
+        String tag = spSCHAT.getString(TAG, "");
+        if (tag.equals("")) tvTag.setVisibility(View.GONE);
+        else {
+            tvTag.setVisibility(View.VISIBLE);
+            tvTag.setText(tag);
+        }
+
+        RecyclerView rvAcc = dMenu.findViewById(R.id.maSub1);
+        rvAcc.setLayoutManager(new LinearLayoutManager(context));
+
+        dMenu.findViewById(R.id.mClose).setOnClickListener(v -> dMenu.dismiss());
+
+        dMenu.findViewById(R.id.mAccount).setOnClickListener(v -> {
             if (isAccount) {
                 dMenu.findViewById(R.id.ma).setRotation(0);
                 dMenu.findViewById(R.id.maSub).setAlpha(1);
@@ -66,10 +110,16 @@ public class MainActivity extends Activity {
                 dMenu.findViewById(R.id.maSub).setVisibility(View.VISIBLE);
                 dMenu.findViewById(R.id.maSub).animate().alpha(1).setDuration(500);
                 isAccount = true;
+                // Set to Adapter from Data Account
+                rvAcc.setAdapter(new AccountAdapter(jsonObjectArrayList));
             }
         });
         
         dMenu.findViewById(R.id.maSub2).setOnClickListener(v -> sign());
+
+        dMenu.findViewById(R.id.mSetting).setOnClickListener(v -> {
+            //
+        });
 
         dMenu.show();
     }
@@ -79,7 +129,7 @@ public class MainActivity extends Activity {
         isAccount = false;
         if (dMenu != null) dMenu.dismiss();
         // Dialog Login
-        dSign = new Dialog(this);
+        dSign = new Dialog(context);
         dSign.setContentView(R.layout.dialog_sign);
         dSign.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dSign.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -94,6 +144,28 @@ public class MainActivity extends Activity {
         TextView tvSign, tvLogReg;
         tvSign = dSign.findViewById(R.id.sTSignInUp);
         tvLogReg = dSign.findViewById(R.id.sTLogInReg);
+
+        EditText etName, etPassword;
+        etName = dSign.findViewById(R.id.sEName);
+        etUsername = dSign.findViewById(R.id.sEUsername);
+        etPassword = dSign.findViewById(R.id.sEPassword);
+
+        etUsername.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                etUsername.setTextColor(getResources().getColor(R.color.gray));
+            }
+        });
 
         dSign.findViewById(R.id.sSignIn).setOnClickListener(v -> {
             tvSign.setText("Sign In");
@@ -114,55 +186,78 @@ public class MainActivity extends Activity {
         dSign.findViewById(R.id.sBack).setOnClickListener(v -> {
             llSign.setVisibility(View.VISIBLE);
             llSignInUp.setVisibility(View.GONE);
+            etName.setText("");
+            etUsername.setText("");
+            etPassword.setText("");
         });
 
         dSign.findViewById(R.id.sLLogInReg).setOnClickListener(v -> {
+            String name, username, password;
+            name = etName.getText().toString();
+            username = etUsername.getText().toString();
+            password = etPassword.getText().toString();
+            Boolean isEmpty = false;
             if (llName.getVisibility() == View.GONE) {
                 // Login
-                login();
+                if (!username.isEmpty() && !password.isEmpty()) {
+                    logreg(name, username, password, true);
+                } else isEmpty = true;
             } else {
                 // Register
+                if (!name.isEmpty() && !username.isEmpty() && !password.isEmpty()) {
+                    logreg(name, username, password, false);
+                } else isEmpty = true;
+            }
+            if (isEmpty) {
+                Toast.makeText(context, "Data cannot be empty!", Toast.LENGTH_SHORT).show();
             }
         });
 
         dSign.show();
     }
 
-    private void login() {
-        String tes = "{\"request\":\"login\",\"data\":{\"username\":\"faris\",\"password\":\"faris\"}}";
-        JsonObject jsonObject = JsonParser.parseString(tes).getAsJsonObject();
+    private void logreg(String name, String username, String password, Boolean isLogReg) {
+        String LogReg = "";
+        if (isLogReg) {
+            LogReg = "{\"request\":\"login\",\"data\":{\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
+        } else {
+            LogReg = "{\"request\":\"register\",\"data\":{\"name\":\""+name+"\",\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
+        }
+        JsonObject jsonObject = JsonParser.parseString(LogReg).getAsJsonObject();
         try {
-            new Client().getOkHttpClient("http://192.168.34.68/schat/index.php", new Gson().toJson(jsonObject), new Client.OKHttpNetwork() {
+            new Client().getOkHttpClient("http://192.168.34.68/schat/", String.valueOf(jsonObject), new Client.OKHttpNetwork() {
                 @Override
                 public void onSuccess(String response) {
-                    // Log Response
-                    Log.d("HEHEHE1", response);
-
-                    // Check JSON Object or Array
-                    try {
-                        Object json = new JSONTokener(response).nextValue();
-                        if (json instanceof JSONObject) {
-                            Log.d("JSONObject", "YES");
-                        } else if (json instanceof JSONArray) {
-                            Log.d("JSONArray", "YES");
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                Boolean isYour = false;
+                                for (JSONObject object : jsonObjectArrayList) {
+                                    if (jsonObject.getString("key").equals(object.getString("key"))) isYour = true;
+                                }
+                                if (!isYour) {
+                                    // Add Data JSON
+                                    jsonObjectArrayList.add(jsonObject);
+                                    // Save Data
+                                    spSCHAT.edit()
+                                            .putBoolean(SIGN, true)
+                                            .putString(KEY, jsonObject.getString("key"))
+                                            .putString(TAG, jsonObject.getString("tag"))
+                                            .putString(NAME, jsonObject.getString("name"))
+                                            .putString(ACC, String.valueOf(jsonObjectArrayList))
+                                            .commit();
+                                    dSign.dismiss();
+                                } else Toast.makeText(context, "You're already logged in", Toast.LENGTH_SHORT).show();
+                            } else {
+                                if (jsonObject.getString("message").equals("Username has been taken!")) etUsername.setTextColor(Color.RED);
+                                Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Redirect
-                    try {
-                        Boolean status = new JSONObject(response).getBoolean("status");
-                        if (status) {
-                            Log.d("HEHEHE1", "YES");
-                        } else {
-                            Log.d("HEHEHE1", "No");
-                        }
-//                        Log.d("HEHEHE2", redirectUrl);
-//                        startActivity(new Intent(MainActivity.this, RedirectView.class).putExtra("URL", redirectUrl));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    });
                 }
 
                 @Override
@@ -171,6 +266,20 @@ public class MainActivity extends Activity {
                 }
             });
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadAcc() {
+        // Load Data JSON
+        dataAcc = spSCHAT.getString(ACC, "");
+        try {
+            jsonObjectArrayList = new ArrayList<>();
+            if (!dataAcc.equals("")) {
+                JSONArray jsonArray = new JSONArray(dataAcc);
+                for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
+            }
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }
