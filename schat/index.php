@@ -9,17 +9,6 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Tabel
-// CREATE TABLE `user` (
-//     `id` int(11) NOT NULL,
-//     `key` varchar(255) NOT NULL,
-//     `tag` varchar(255) NOT NULL,
-//     `name` varchar(255) NOT NULL,
-//     `username` varchar(255) NOT NULL,
-//     `password` varchar(255) NOT NULL,
-//     `photo` varchar(255) NOT NULL
-// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 header("Content-Type: application/json");
 $response = file_get_contents('php://input');
 $data = json_decode($response, true);
@@ -77,6 +66,55 @@ if ($data['request'] == "login") {
         echo json_encode($response);
     } else {
         $response = array("status" => false, "message" => "Login Failed!");
+        echo json_encode($response);
+    }
+}
+
+// Add Contact
+// {
+//     "request" : "add_contact",
+//     "data" : {
+//         "key" : "bc8b38b75a0785bf26f8e0d3508c82fe",
+//         "tag" : "29142679597168f3ede4bec2c6a61013"
+//     }
+// }
+//
+if ($data['request'] == "add_contact") {
+    $key = $data['data']['key'];
+    $tag = $data['data']['tag'];
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `tag`='$tag'");
+    if (mysqli_affected_rows($conn) == 0) {
+        $response = array("status" => false, "message" => "Tag Not Found!");
+        echo json_encode($response);
+    } else {
+        $query = mysqli_query($conn, "INSERT INTO `contact` (`key`, `tag`) VALUES ('$key', '$tag')");
+        if (mysqli_affected_rows($conn)) {
+            $response = array("status" => true, "message" => "Add Contact Success!");
+            echo json_encode($response);
+        } else {
+            $response = array("status" => false, "message" => "Add Contact Failed!");
+            echo json_encode($response);
+        }
+    }
+}
+
+// Profile
+// {
+//     "request" : "profile",
+//     "data" : {
+//         "key" : "bc8b38b75a0785bf26f8e0d3508c82fe"
+//     }
+// }
+//
+if ($data['request'] == "profile") {
+    $key = $data['data']['key'];
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `key`='$key'");
+    $object = mysqli_fetch_object($query);
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "tag" => $object->tag, "name" => $object->name, "photo" => $object->photo, "bio" => $object->bio);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => false, "message" => "Data Not Found!");
         echo json_encode($response);
     }
 }
