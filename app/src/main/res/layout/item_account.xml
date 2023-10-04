@@ -7,11 +7,26 @@
     android:gravity="center"
     android:background="@drawable/bg_button_4">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/aPhoto"
+    <RelativeLayout
         android:layout_width="@dimen/_25sdp"
-        android:layout_height="@dimen/_25sdp"
-        android:src="@drawable/avatar" />
+        android:layout_height="@dimen/_25sdp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/aPhoto"
+            android:layout_width="@dimen/_25sdp"
+            android:layout_height="@dimen/_25sdp"
+            android:src="@drawable/avatar" />
+
+        <ImageView
+            android:id="@+id/aSelect"
+            android:layout_width="@dimen/_10sdp"
+            android:layout_height="@dimen/_10sdp"
+            android:layout_marginEnd="@dimen/_minus1sdp"
+            android:layout_marginBottom="@dimen/_minus1sdp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/ic_check_circle" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/aName"

@@ -12,7 +12,7 @@ import okhttp3.Response;
 
 public class Client {
 
-    public static final String BASE_URL = "http://192.168.34.68/schat/index.php";
+    public static final String BASE_URL = "http://192.168.35.30/schat/";
 
     public interface OKHttpNetwork {
         void onSuccess(String response);

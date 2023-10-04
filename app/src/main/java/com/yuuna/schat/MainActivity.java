@@ -1,5 +1,6 @@
 package com.yuuna.schat;
 
+import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.SharedPref.ACC;
 import static com.yuuna.schat.util.SharedPref.KEY;
 import static com.yuuna.schat.util.SharedPref.NAME;
@@ -45,18 +46,18 @@ import org.json.JSONTokener;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements AccountAdapter.ItemClickListener {
 
     private EditText etUsername;
 
     private Context context;
-    private Dialog dMenu, dSign;
+    private Dialog dMenu, dSign, dContact, dAddContact;
     private SharedPreferences spSCHAT;
 
     private ArrayList<JSONObject> jsonObjectArrayList;
 
-    private String dataAcc;
-    private Boolean isAccount = false, isSign;
+    private String dataAcc, setKey, setTag, setName;
+    private Boolean isAccount, isSign;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,16 +65,84 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         findViewById(R.id.mMenu).setOnClickListener(v -> menuDialog());
+        findViewById(R.id.mContact).setOnClickListener(v -> contactDialog());
 
         context = MainActivity.this;
 
         spSCHAT = getSharedPreferences(SCHAT, MODE_PRIVATE);
         isSign = spSCHAT.getBoolean(SIGN, false);
+        setKey = spSCHAT.getString(KEY, "");
+        setTag = spSCHAT.getString(TAG, "");
+        setName = spSCHAT.getString(NAME, "");
+
         if (!isSign) sign();
         loadAcc();
     }
 
+    private void contactDialog() {
+        if (dAddContact != null) dAddContact.dismiss();
+        dContact = new Dialog(context);
+        dContact.setContentView(R.layout.dialog_contact);
+        dContact.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dContact.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        dContact.findViewById(R.id.cAdd).setOnClickListener(v -> addContactDialog());
+        dContact.findViewById(R.id.cClose).setOnClickListener(v -> dContact.dismiss());
+
+        dContact.show();
+    }
+
+    private void addContactDialog() {
+        if (dContact != null) dContact.dismiss();
+        dAddContact = new Dialog(context);
+        dAddContact.setContentView(R.layout.dialog_add_contact);
+        dAddContact.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dAddContact.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        dAddContact.findViewById(R.id.acBack).setOnClickListener(v -> contactDialog());
+        dAddContact.findViewById(R.id.acAdd).setOnClickListener(v -> {
+            EditText etTag = dAddContact.findViewById(R.id.acTag);
+            if (!etTag.getText().toString().isEmpty()) addcontact(etTag.getText().toString());
+            else Toast.makeText(context, "Tag cannot be empty!", Toast.LENGTH_SHORT).show();
+        });
+
+        dAddContact.show();
+    }
+
+    private void addcontact(String tag) {
+        String add_contact = "{\"request\":\"add_contact\",\"data\":{\"key\":\""+setKey+"\",\"tag\":\""+tag+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                                dAddContact.dismiss();
+                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void menuDialog() {
+        // Set Default Dialog Menu
+        isAccount = false;
         // Dialog Menu
         dMenu = new Dialog(context);
         dMenu.setContentView(R.layout.dialog_menu);
@@ -111,14 +180,19 @@ public class MainActivity extends Activity {
                 dMenu.findViewById(R.id.maSub).animate().alpha(1).setDuration(500);
                 isAccount = true;
                 // Set to Adapter from Data Account
-                rvAcc.setAdapter(new AccountAdapter(jsonObjectArrayList));
+                AccountAdapter accountAdapter = new AccountAdapter(jsonObjectArrayList, context);
+                rvAcc.setAdapter(accountAdapter);
+                accountAdapter.setClickListener(MainActivity.this);
             }
         });
         
         dMenu.findViewById(R.id.maSub2).setOnClickListener(v -> sign());
 
         dMenu.findViewById(R.id.mSetting).setOnClickListener(v -> {
-            //
+            if (setKey != null || !setKey.equals("")) {
+                dMenu.dismiss();
+                startActivity(new Intent(context, SettingActivity.class));
+            }
         });
 
         dMenu.show();
@@ -225,7 +299,7 @@ public class MainActivity extends Activity {
         }
         JsonObject jsonObject = JsonParser.parseString(LogReg).getAsJsonObject();
         try {
-            new Client().getOkHttpClient("http://192.168.34.68/schat/", String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
                 @Override
                 public void onSuccess(String response) {
                     runOnUiThread(() -> {
@@ -238,17 +312,23 @@ public class MainActivity extends Activity {
                                     if (jsonObject.getString("key").equals(object.getString("key"))) isYour = true;
                                 }
                                 if (!isYour) {
+                                    isSign = true;
+                                    // Set New Key
+                                    setKey = jsonObject.getString("key");
+                                    setTag = jsonObject.getString("tag");
+                                    setName = jsonObject.getString("name");
                                     // Add Data JSON
                                     jsonObjectArrayList.add(jsonObject);
                                     // Save Data
                                     spSCHAT.edit()
-                                            .putBoolean(SIGN, true)
-                                            .putString(KEY, jsonObject.getString("key"))
-                                            .putString(TAG, jsonObject.getString("tag"))
-                                            .putString(NAME, jsonObject.getString("name"))
+                                            .putBoolean(SIGN, isSign)
+                                            .putString(KEY, setKey)
+                                            .putString(TAG, setTag)
+                                            .putString(NAME, setName)
                                             .putString(ACC, String.valueOf(jsonObjectArrayList))
                                             .commit();
                                     dSign.dismiss();
+                                    Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                                 } else Toast.makeText(context, "You're already logged in", Toast.LENGTH_SHORT).show();
                             } else {
                                 if (jsonObject.getString("message").equals("Username has been taken!")) etUsername.setTextColor(Color.RED);
@@ -279,6 +359,20 @@ public class MainActivity extends Activity {
                 JSONArray jsonArray = new JSONArray(dataAcc);
                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onItemClick(JSONObject jsonObject) {
+        try {
+            spSCHAT.edit()
+                    .putString(KEY, jsonObject.getString("key"))
+                    .putString(TAG, jsonObject.getString("tag"))
+                    .putString(NAME, jsonObject.getString("name"))
+                    .commit();
+            dMenu.dismiss();
         } catch (JSONException e) {
             e.printStackTrace();
         }

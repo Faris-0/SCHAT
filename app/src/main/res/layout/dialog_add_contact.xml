@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/_275sdp"
+    android:layout_width="@dimen/_300sdp"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     app:cardCornerRadius="@dimen/_8sdp"
@@ -20,18 +20,8 @@
             android:layout_marginBottom="@dimen/_15sdp"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.9"
-                android:text="Sign In"
-                android:textSize="@dimen/_15ssp"
-                android:textColor="@color/gray"
-                android:textStyle="bold"
-                android:layout_gravity="center"/>
-
             <LinearLayout
-                android:id="@+id/lClose"
+                android:id="@+id/acBack"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:background="@drawable/bg_button_3"
@@ -40,14 +30,26 @@
                 <ImageView
                     android:layout_width="@dimen/_17sdp"
                     android:layout_height="@dimen/_17sdp"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel" />
+                    android:src="@drawable/ic_arrow"
+                    android:rotation="180"
+                    android:tint="@color/gray" />
             </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_12sdp"
+                android:text="Add Contact"
+                android:textSize="@dimen/_15ssp"
+                android:textColor="@color/gray"
+                android:textStyle="bold"
+                android:layout_gravity="center"/>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/_8sdp"
+            android:padding="@dimen/_5sdp"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -62,53 +64,32 @@
             </LinearLayout>
 
             <EditText
-                android:id="@+id/lUsername"
-                android:layout_width="match_parent"
+                android:id="@+id/acTag"
+                android:layout_width="0dp"
                 android:layout_height="@dimen/_25sdp"
+                android:layout_weight="0.9"
                 android:paddingHorizontal="@dimen/_8sdp"
-                android:hint="Username"
+                android:hint="Tag*"
                 android:textColorHint="@color/light_gray"
                 android:textSize="@dimen/_12ssp"
                 android:textColor="@color/gray"
                 android:gravity="center_vertical"
                 android:singleLine="true"
                 android:background="@android:color/transparent" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_1sdp"
-            android:background="@color/gray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/_8sdp"
-            android:orientation="horizontal">
 
             <LinearLayout
+                android:id="@+id/acAdd"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
+                android:background="@drawable/bg_button_3"
                 android:gravity="center">
 
                 <ImageView
-                    android:layout_width="@dimen/_17sdp"
-                    android:layout_height="@dimen/_17sdp"
-                    android:src="@drawable/ic_lock" />
+                    android:layout_width="@dimen/_14sdp"
+                    android:layout_height="@dimen/_14sdp"
+                    android:src="@drawable/ic_plus"
+                    android:tint="@color/gray" />
             </LinearLayout>
-
-            <EditText
-                android:id="@+id/lPassword"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_25sdp"
-                android:paddingHorizontal="@dimen/_8sdp"
-                android:hint="Password"
-                android:textColorHint="@color/light_gray"
-                android:textSize="@dimen/_12ssp"
-                android:textColor="@color/gray"
-                android:gravity="center_vertical"
-                android:singleLine="true"
-                android:background="@android:color/transparent" />
         </LinearLayout>
 
         <View
@@ -116,20 +97,11 @@
             android:layout_height="@dimen/_1sdp"
             android:background="@color/gray" />
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_20sdp"
-            android:gravity="center"
-            android:padding="@dimen/_5sdp"
-            android:background="@drawable/bg_button_1">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Login"
-                android:textSize="@dimen/_13ssp"
-                android:textColor="@color/white" />
-        </LinearLayout>
+            android:text="*Make sure they have created a tag"
+            android:textSize="@dimen/_10ssp"
+            android:textColor="@color/gray" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

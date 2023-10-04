@@ -20,7 +20,7 @@
             android:layout_height="@dimen/_45sdp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/bg_button_2">
+            android:background="@drawable/bg_button_7">
 
             <ImageView
                 android:layout_width="@dimen/_17sdp"
@@ -42,12 +42,27 @@
             android:gravity="center_vertical" />
 
         <LinearLayout
+            android:id="@+id/mContact"
+            android:layout_width="@dimen/_35sdp"
+            android:layout_height="@dimen/_45sdp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:background="@drawable/bg_button_7">
+
+            <ImageView
+                android:layout_width="@dimen/_17sdp"
+                android:layout_height="@dimen/_17sdp"
+                android:src="@drawable/ic_user"
+                android:tint="@color/white" />
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/mFind"
             android:layout_width="@dimen/_35sdp"
             android:layout_height="@dimen/_45sdp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/bg_button_2">
+            android:background="@drawable/bg_button_7">
 
             <ImageView
                 android:layout_width="@dimen/_17sdp"
@@ -59,5 +74,5 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/item_contact" />
+        tools:listitem="@layout/item_message" />
 </LinearLayout>
