@@ -144,6 +144,7 @@
                     android:textColor="@color/gray"
                     android:gravity="center_vertical"
                     android:singleLine="true"
+                    android:maxLength="25"
                     android:background="@android:color/transparent" />
             </LinearLayout>
 
@@ -181,6 +182,7 @@
                 android:textColor="@color/gray"
                 android:gravity="center_vertical"
                 android:singleLine="true"
+                android:maxLength="32"
                 android:background="@android:color/transparent" />
         </LinearLayout>
 

@@ -1,6 +1,6 @@
 package com.yuuna.schat.adapter;
 
-import static com.yuuna.schat.util.SharedPref.KEY;
+import static com.yuuna.schat.util.SharedPref.TAG_KEY;
 import static com.yuuna.schat.util.SharedPref.SCHAT;
 
 import android.content.Context;
@@ -39,7 +39,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        String key = mContext.getSharedPreferences(SCHAT, Context.MODE_PRIVATE).getString(KEY, "");
+        String key = mContext.getSharedPreferences(SCHAT, Context.MODE_PRIVATE).getString(TAG_KEY, "");
         try {
             if (key.equals(jsonObjectDataList.get(position).getString("key"))) holder.ivSelect.setVisibility(View.VISIBLE);
             else holder.ivSelect.setVisibility(View.GONE);

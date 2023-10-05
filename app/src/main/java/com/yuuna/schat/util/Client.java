@@ -28,21 +28,15 @@ public class Client {
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
-                    try {
-                        okHttpCallBack.onSuccess(response.body().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) okHttpCallBack.onSuccess(response.body().string());
             }
         });
     }
 
     // Request with Body (JSON)
     public void getOkHttpClient(String url, String hashMap, OKHttpNetwork okHttpCallBack) throws IOException {
-        RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), hashMap);
+        RequestBody body = RequestBody.create(hashMap, MediaType.parse("application/json; charset=utf-8"));
         new OkHttpClient().newCall(new Request.Builder().url(url).post(body).build()).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -50,14 +44,8 @@ public class Client {
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
-                    try {
-                        okHttpCallBack.onSuccess(response.body().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) okHttpCallBack.onSuccess(response.body().string());
             }
         });
     }

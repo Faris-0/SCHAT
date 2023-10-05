@@ -19,37 +19,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/_15sdp"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="@dimen/_27sdp"
+                android:layout_height="wrap_content"
                 android:layout_weight="0.9"
-                android:layout_marginStart="@dimen/_8sdp"
                 android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/mName"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.9"
+                    android:layout_height="wrap_content"
                     android:text="Name"
                     android:textColor="@color/gray"
-                    android:textSize="@dimen/_12ssp"
+                    android:textSize="@dimen/_13ssp"
                     android:textStyle="bold"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:gravity="center_vertical" />
-
-                <TextView
-                    android:id="@+id/mTag"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_minus2sdp"
-                    android:visibility="gone"
-                    android:text="Tag"
-                    android:textColor="@color/gray"
-                    android:textSize="@dimen/_9ssp" />
             </LinearLayout>
 
             <LinearLayout
@@ -57,7 +46,6 @@
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:background="@drawable/bg_button_3"
-                android:layout_gravity="center"
                 android:gravity="center">
 
                 <ImageView

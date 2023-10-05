@@ -20,9 +20,9 @@ if ($data == null) {
 // {
 //     "request" : "register",
 //     "data" : {
-//         "name" : "Faris",
-//         "username" : "faris",
-//         "password" : "faris"
+//         "name" : "",
+//         "username" : "",
+//         "password" : ""
 //     }
 // }
 //
@@ -38,7 +38,7 @@ if ($data['request'] == "register") {
     } else {
         $query = mysqli_query($conn, "INSERT INTO `user` (`key`, `name`, `username`, `password`) VALUES ('$key', '$name', '$username', '$password')");
         if (mysqli_affected_rows($conn)) {
-            $response = array("status" => true, "key" => $key, "tag" => "", "name" => $name, "message" => "Register Success!");
+            $response = array("status" => true, "key" => $key, "name" => $name, "message" => "Register Success!");
             echo json_encode($response);
         } else {
             $response = array("status" => false, "message" => "Register Failed!");
@@ -51,8 +51,8 @@ if ($data['request'] == "register") {
 // {
 //     "request" : "login",
 //     "data" : {
-//         "username" : "faris",
-//         "password" : "faris"
+//         "username" : "",
+//         "password" : ""
 //     }
 // }
 //
@@ -62,7 +62,7 @@ if ($data['request'] == "login") {
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username' AND `password`='$password'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "key" => $object->key, "tag" => $object->tag, "name" => $object->name, "message" => "Login Success!");
+        $response = array("status" => true, "key" => $object->key, "name" => $object->name, "message" => "Login Success!");
         echo json_encode($response);
     } else {
         $response = array("status" => false, "message" => "Login Failed!");
@@ -74,20 +74,20 @@ if ($data['request'] == "login") {
 // {
 //     "request" : "add_contact",
 //     "data" : {
-//         "key" : "bc8b38b75a0785bf26f8e0d3508c82fe",
-//         "tag" : "29142679597168f3ede4bec2c6a61013"
+//         "key" : "",
+//         "username" : ""
 //     }
 // }
 //
 if ($data['request'] == "add_contact") {
     $key = $data['data']['key'];
-    $tag = $data['data']['tag'];
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `tag`='$tag'");
+    $username = $data['data']['username'];
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
     if (mysqli_affected_rows($conn) == 0) {
-        $response = array("status" => false, "message" => "Tag Not Found!");
+        $response = array("status" => false, "message" => "Username Not Found!");
         echo json_encode($response);
     } else {
-        $query = mysqli_query($conn, "INSERT INTO `contact` (`key`, `tag`) VALUES ('$key', '$tag')");
+        $query = mysqli_query($conn, "INSERT INTO `contact` (`key`, `username`) VALUES ('$key', '$username')");
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => true, "message" => "Add Contact Success!");
             echo json_encode($response);
@@ -102,7 +102,7 @@ if ($data['request'] == "add_contact") {
 // {
 //     "request" : "profile",
 //     "data" : {
-//         "key" : "bc8b38b75a0785bf26f8e0d3508c82fe"
+//         "key" : ""
 //     }
 // }
 //
@@ -111,7 +111,7 @@ if ($data['request'] == "profile") {
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `key`='$key'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "tag" => $object->tag, "name" => $object->name, "photo" => $object->photo, "bio" => $object->bio);
+        $response = array("status" => true, "name" => $object->name, "photo" => $object->photo, "bio" => $object->bio);
         echo json_encode($response);
     } else {
         $response = array("status" => false, "message" => "Data Not Found!");

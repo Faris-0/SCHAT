@@ -1,12 +1,11 @@
 package com.yuuna.schat;
 
 import static com.yuuna.schat.util.Client.BASE_URL;
-import static com.yuuna.schat.util.SharedPref.ACC;
-import static com.yuuna.schat.util.SharedPref.KEY;
-import static com.yuuna.schat.util.SharedPref.NAME;
+import static com.yuuna.schat.util.SharedPref.TAG_ACC;
+import static com.yuuna.schat.util.SharedPref.TAG_KEY;
+import static com.yuuna.schat.util.SharedPref.TAG_NAME;
 import static com.yuuna.schat.util.SharedPref.SCHAT;
-import static com.yuuna.schat.util.SharedPref.SIGN;
-import static com.yuuna.schat.util.SharedPref.TAG;
+import static com.yuuna.schat.util.SharedPref.TAG_SIGN;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -56,7 +55,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
     private ArrayList<JSONObject> jsonObjectArrayList;
 
-    private String dataAcc, setKey, setTag, setName;
+    private String dataAcc, setKey, setName;
     private Boolean isAccount, isSign;
 
     @Override
@@ -70,10 +69,9 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         context = MainActivity.this;
 
         spSCHAT = getSharedPreferences(SCHAT, MODE_PRIVATE);
-        isSign = spSCHAT.getBoolean(SIGN, false);
-        setKey = spSCHAT.getString(KEY, "");
-        setTag = spSCHAT.getString(TAG, "");
-        setName = spSCHAT.getString(NAME, "");
+        isSign = spSCHAT.getBoolean(TAG_SIGN, false);
+        setKey = spSCHAT.getString(TAG_KEY, "");
+        setName = spSCHAT.getString(TAG_NAME, "");
 
         if (!isSign) sign();
         loadAcc();
@@ -101,16 +99,16 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
         dAddContact.findViewById(R.id.acBack).setOnClickListener(v -> contactDialog());
         dAddContact.findViewById(R.id.acAdd).setOnClickListener(v -> {
-            EditText etTag = dAddContact.findViewById(R.id.acTag);
-            if (!etTag.getText().toString().isEmpty()) addcontact(etTag.getText().toString());
+            EditText etUsername = dAddContact.findViewById(R.id.acUsername);
+            if (!etUsername.getText().toString().isEmpty()) addcontact(etUsername.getText().toString());
             else Toast.makeText(context, "Tag cannot be empty!", Toast.LENGTH_SHORT).show();
         });
 
         dAddContact.show();
     }
 
-    private void addcontact(String tag) {
-        String add_contact = "{\"request\":\"add_contact\",\"data\":{\"key\":\""+setKey+"\",\"tag\":\""+tag+"\"}}";
+    private void addcontact(String username) {
+        String add_contact = "{\"request\":\"add_contact\",\"data\":{\"key\":\""+setKey+"\",\"username\":\""+username+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
@@ -149,17 +147,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         dMenu.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        TextView tvName, tvTag;
-        tvName = dMenu.findViewById(R.id.mName);
-        tvTag = dMenu.findViewById(R.id.mTag);
-
-        tvName.setText(spSCHAT.getString(NAME, ""));
-        String tag = spSCHAT.getString(TAG, "");
-        if (tag.equals("")) tvTag.setVisibility(View.GONE);
-        else {
-            tvTag.setVisibility(View.VISIBLE);
-            tvTag.setText(tag);
-        }
+        TextView tvName = dMenu.findViewById(R.id.mName);
+        tvName.setText(spSCHAT.getString(TAG_NAME, ""));
 
         RecyclerView rvAcc = dMenu.findViewById(R.id.maSub1);
         rvAcc.setLayoutManager(new LinearLayoutManager(context));
@@ -315,17 +304,15 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                     isSign = true;
                                     // Set New Key
                                     setKey = jsonObject.getString("key");
-                                    setTag = jsonObject.getString("tag");
                                     setName = jsonObject.getString("name");
                                     // Add Data JSON
                                     jsonObjectArrayList.add(jsonObject);
                                     // Save Data
                                     spSCHAT.edit()
-                                            .putBoolean(SIGN, isSign)
-                                            .putString(KEY, setKey)
-                                            .putString(TAG, setTag)
-                                            .putString(NAME, setName)
-                                            .putString(ACC, String.valueOf(jsonObjectArrayList))
+                                            .putBoolean(TAG_SIGN, isSign)
+                                            .putString(TAG_KEY, setKey)
+                                            .putString(TAG_NAME, setName)
+                                            .putString(TAG_ACC, String.valueOf(jsonObjectArrayList))
                                             .commit();
                                     dSign.dismiss();
                                     Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
@@ -352,7 +339,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
     private void loadAcc() {
         // Load Data JSON
-        dataAcc = spSCHAT.getString(ACC, "");
+        dataAcc = spSCHAT.getString(TAG_ACC, "");
         try {
             jsonObjectArrayList = new ArrayList<>();
             if (!dataAcc.equals("")) {
@@ -368,9 +355,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     public void onItemClick(JSONObject jsonObject) {
         try {
             spSCHAT.edit()
-                    .putString(KEY, jsonObject.getString("key"))
-                    .putString(TAG, jsonObject.getString("tag"))
-                    .putString(NAME, jsonObject.getString("name"))
+                    .putString(TAG_KEY, jsonObject.getString("key"))
+                    .putString(TAG_NAME, jsonObject.getString("name"))
                     .commit();
             dMenu.dismiss();
         } catch (JSONException e) {

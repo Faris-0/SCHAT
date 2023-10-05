@@ -30,7 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `contact` (
   `id` int(11) NOT NULL,
   `key` varchar(255) NOT NULL,
-  `tag` varchar(255) NOT NULL
+  `username` varchar(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -42,12 +42,11 @@ CREATE TABLE `contact` (
 CREATE TABLE `user` (
   `id` int(11) NOT NULL,
   `key` varchar(255) NOT NULL,
-  `tag` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `username` varchar(255) NOT NULL,
+  `name` varchar(25) NOT NULL,
+  `username` varchar(32) NOT NULL,
   `password` varchar(255) NOT NULL,
   `photo` varchar(255) NOT NULL,
-  `bio` text NOT NULL
+  `bio` varchar(70) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
