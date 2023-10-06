@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 04, 2023 at 08:02 AM
+-- Generation Time: Oct 06, 2023 at 04:45 AM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 8.0.7
 
@@ -28,7 +28,6 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `contact` (
-  `id` int(11) NOT NULL,
   `key` varchar(255) NOT NULL,
   `username` varchar(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -40,7 +39,6 @@ CREATE TABLE `contact` (
 --
 
 CREATE TABLE `user` (
-  `id` int(11) NOT NULL,
   `key` varchar(255) NOT NULL,
   `name` varchar(25) NOT NULL,
   `username` varchar(32) NOT NULL,
@@ -57,17 +55,13 @@ CREATE TABLE `user` (
 -- Indexes for table `contact`
 --
 ALTER TABLE `contact`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`key`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- Indexes for table `user`
 --
-
---
--- AUTO_INCREMENT for table `contact`
---
-ALTER TABLE `contact`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`key`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

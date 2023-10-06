@@ -119,5 +119,49 @@ if ($data['request'] == "profile") {
     }
 }
 
+// Edit Name
+// {
+//     "request" : "edit_name",
+//     "data" : {
+//         "key" : "",
+//         "name" : ""
+//     }
+// }
+//
+if ($data['request'] == "edit_name") {
+    $key = $data['data']['key'];
+    $name = $data['data']['name'];
+    $query = mysqli_query($conn, "UPDATE `user` SET `name` = '$name' WHERE `key` = '$key'");
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "message" => "Edit Name Success!");
+        echo json_encode($response);
+    } else {
+        $response = array("status" => false);
+        echo json_encode($response);
+    }
+}
+
+// Edit Bio
+// {
+//     "request" : "edit_bio",
+//     "data" : {
+//         "key" : "",
+//         "bio" : ""
+//     }
+// }
+//
+if ($data['request'] == "edit_bio") {
+    $key = $data['data']['key'];
+    $bio = $data['data']['bio'];
+    $query = mysqli_query($conn, "UPDATE `user` SET `bio` = '$bio' WHERE `key` = '$key'");
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "message" => "Edit Bio Success!");
+        echo json_encode($response);
+    } else {
+        $response = array("status" => false);
+        echo json_encode($response);
+    }
+}
+
 $conn->close();
 ?>

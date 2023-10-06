@@ -74,7 +74,6 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         setName = spSCHAT.getString(TAG_NAME, "");
 
         if (!isSign) sign();
-        loadAcc();
     }
 
     private void contactDialog() {
@@ -152,6 +151,10 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
         RecyclerView rvAcc = dMenu.findViewById(R.id.maSub1);
         rvAcc.setLayoutManager(new LinearLayoutManager(context));
+        // Set to Adapter from Data Account
+        AccountAdapter accountAdapter = new AccountAdapter(jsonObjectArrayList, context);
+        rvAcc.setAdapter(accountAdapter);
+        accountAdapter.setClickListener(MainActivity.this);
 
         dMenu.findViewById(R.id.mClose).setOnClickListener(v -> dMenu.dismiss());
 
@@ -168,10 +171,6 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 dMenu.findViewById(R.id.maSub).setVisibility(View.VISIBLE);
                 dMenu.findViewById(R.id.maSub).animate().alpha(1).setDuration(500);
                 isAccount = true;
-                // Set to Adapter from Data Account
-                AccountAdapter accountAdapter = new AccountAdapter(jsonObjectArrayList, context);
-                rvAcc.setAdapter(accountAdapter);
-                accountAdapter.setClickListener(MainActivity.this);
             }
         });
         
@@ -306,7 +305,9 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                     setKey = jsonObject.getString("key");
                                     setName = jsonObject.getString("name");
                                     // Add Data JSON
-                                    jsonObjectArrayList.add(jsonObject);
+                                    jsonObjectArrayList.add(new JSONObject()
+                                                    .put("number", jsonObjectArrayList.size() + 1)
+                                                    .put("key", setKey).put("name", setName));
                                     // Save Data
                                     spSCHAT.edit()
                                             .putBoolean(TAG_SIGN, isSign)
@@ -362,5 +363,11 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        loadAcc();
     }
 }

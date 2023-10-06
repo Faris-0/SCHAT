@@ -75,17 +75,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
             itemView.setOnClickListener(v -> {
                 if (clickListener != null) clickListener.onItemClick(jsonObjectDataList.get(getBindingAdapterPosition()));
             });
-//            itemView.setOnClickListener(v -> {
-//                try {
-//                    setKey = jsonObjectDataList.get(getBindingAdapterPosition()).getString("key");
-//                    setTag = jsonObjectDataList.get(getBindingAdapterPosition()).getString("tag");
-//                    setName = jsonObjectDataList.get(getBindingAdapterPosition()).getString("name");
-//                    notifyDataSetChanged();
-//                    dMenu.dismiss();
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            });
         }
     }
 }
