@@ -12,7 +12,8 @@ import okhttp3.Response;
 
 public class Client {
 
-    public static final String BASE_URL = "http://192.168.35.30/schat/";
+    public static final String BASE_URL = "http://192.168.35.63/schat/";
+    public static final String BASE_PHOTO = BASE_URL + "photo/";
 
     public interface OKHttpNetwork {
         void onSuccess(String response);

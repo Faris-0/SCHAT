@@ -20,17 +20,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Percobaan pesan dalam bentuk buble"
+                android:text="Ini adalah pesan yang kita kirim"
                 android:textSize="@dimen/_10ssp"
                 android:textColor="@color/white" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_5sdp"
-                android:text="R"
-                android:textSize="@dimen/_10ssp"
-                android:textColor="@color/white" />
+            <ImageView
+                android:layout_width="@dimen/_14sdp"
+                android:layout_height="@dimen/_14sdp"
+                android:paddingStart="@dimen/_3sdp"
+                android:src="@drawable/ic_double_check" />
         </LinearLayout>
 
         <ImageView

@@ -8,13 +8,13 @@
     android:background="@drawable/bg_button_6">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/aPhoto"
+        android:id="@+id/cPhoto"
         android:layout_width="@dimen/_25sdp"
         android:layout_height="@dimen/_25sdp"
-        android:src="@drawable/avatar" />
+        android:src="@drawable/photo" />
 
     <TextView
-        android:id="@+id/aName"
+        android:id="@+id/cName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"

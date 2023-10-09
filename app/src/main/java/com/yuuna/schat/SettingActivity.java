@@ -1,20 +1,30 @@
 package com.yuuna.schat;
 
+import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.SharedPref.SCHAT;
 import static com.yuuna.schat.util.SharedPref.TAG_ACC;
 import static com.yuuna.schat.util.SharedPref.TAG_KEY;
 import static com.yuuna.schat.util.SharedPref.TAG_NAME;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -22,6 +32,10 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yuuna.schat.util.Client;
@@ -30,6 +44,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,9 +62,10 @@ public class SettingActivity extends Activity {
     private Dialog dName, dBio;
     private SharedPreferences spSCHAT;
 
-    private ArrayList<JSONObject> jsonObjectArrayList, cJsonObjectArrayList;
+    private ArrayList<JSONObject> jsonObjectArrayList;
 
     private String setKey, setName, bio, dataAcc;
+    private Integer TAG_GALLERY = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +81,41 @@ public class SettingActivity extends Activity {
 
         context = SettingActivity.this;
 
+        findViewById(R.id.sBPhoto).setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= 29) {
+                // Open Galley
+                try {
+                    startActivityForResult(new Intent(Intent.ACTION_PICK).setType("image/*"), TAG_GALLERY);
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                    // Open Storage
+                    try {
+                        startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), TAG_GALLERY);
+                    } catch (ActivityNotFoundException q) {
+                        q.printStackTrace();
+                    }
+                }
+            } else ActivityCompat.requestPermissions( this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, TAG_GALLERY);
+        });
         findViewById(R.id.sBName).setOnClickListener(v -> nameDialog());
         findViewById(R.id.sBBio).setOnClickListener(v -> bioDialog());
+        findViewById(R.id.sBSignOut).setOnClickListener(v -> {
+            try {
+                for (int i = 0; i < jsonObjectArrayList.size(); i++) {
+                    if (jsonObjectArrayList.get(i).getString("key").equals(setKey)) jsonObjectArrayList.remove(i);
+                }
+                if (jsonObjectArrayList.size() != 0) {
+                    spSCHAT.edit()
+                            .putString(TAG_KEY, jsonObjectArrayList.get(0).getString("key"))
+                            .putString(TAG_NAME, jsonObjectArrayList.get(0).getString("name"))
+                            .putString(TAG_ACC, String.valueOf(jsonObjectArrayList))
+                            .commit();
+                } else spSCHAT.edit().clear().commit();
+                onBackPressed();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        });
 
         spSCHAT = getSharedPreferences(SCHAT, MODE_PRIVATE);
         setKey = spSCHAT.getString(TAG_KEY, "");
@@ -241,6 +290,13 @@ public class SettingActivity extends Activity {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
+                                String photo = BASE_PHOTO + jsonObject.getString("photo");
+                                if (!photo.equals(BASE_PHOTO)) Glide.with(context)
+                                        .load(photo)
+                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .skipMemoryCache(true)
+                                        .into(civPhoto);
+
                                 bio = jsonObject.getString("bio");
                                 if (!bio.equals("")) tvABio.setText(bio);
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
@@ -248,6 +304,69 @@ public class SettingActivity extends Activity {
                             e.printStackTrace();
                         }
                     });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == TAG_GALLERY){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                // Open Galley
+                try {
+                    startActivityForResult(new Intent(Intent.ACTION_PICK).setType("image/*"), TAG_GALLERY);
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                    // Open Storage
+                    try {
+                        startActivityForResult(new Intent(Intent.ACTION_GET_CONTENT).setType("image/*"), TAG_GALLERY);
+                    } catch (ActivityNotFoundException q) {
+                        q.printStackTrace();
+                    }
+                }
+            } else Toast.makeText(this, "No permission to access images", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == TAG_GALLERY) {
+            try {
+                Bitmap bGallery = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bGallery.compress(Bitmap.CompressFormat.JPEG, 50, stream);
+                byte[] bytes = stream.toByteArray();
+                if (bytes.length/1024 > 1024) {
+                    stream = new ByteArrayOutputStream();
+                    bGallery.compress(Bitmap.CompressFormat.JPEG, 25, stream);
+                    bytes = stream.toByteArray();
+                }
+                String sphoto = Base64.encodeToString(bytes, Base64.DEFAULT);
+                if (sphoto != null) sendPhoto(sphoto);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendPhoto(String sphoto) {
+        String sendphoto = "{\"request\":\"edit_photo\",\"data\":{\"key\":\""+setKey+"\",\"photo\":\""+sphoto+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(sendphoto).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> profile());
                 }
 
                 @Override

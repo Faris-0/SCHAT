@@ -1,5 +1,6 @@
 package com.yuuna.schat;
 
+import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.SharedPref.TAG_ACC;
 import static com.yuuna.schat.util.SharedPref.TAG_KEY;
@@ -15,10 +16,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -29,21 +28,22 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import com.yuuna.schat.adapter.AccountAdapter;
+import com.yuuna.schat.adapter.ContactAdapter;
 import com.yuuna.schat.util.Client;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends Activity implements AccountAdapter.ItemClickListener {
 
@@ -53,7 +53,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     private Dialog dMenu, dSign, dContact, dAddContact;
     private SharedPreferences spSCHAT;
 
-    private ArrayList<JSONObject> jsonObjectArrayList;
+    private ArrayList<JSONObject> jsonObjectArrayList, jsonObjectArrayList2;
 
     private String dataAcc, setKey, setName;
     private Boolean isAccount, isSign;
@@ -65,15 +65,6 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
         findViewById(R.id.mMenu).setOnClickListener(v -> menuDialog());
         findViewById(R.id.mContact).setOnClickListener(v -> contactDialog());
-
-        context = MainActivity.this;
-
-        spSCHAT = getSharedPreferences(SCHAT, MODE_PRIVATE);
-        isSign = spSCHAT.getBoolean(TAG_SIGN, false);
-        setKey = spSCHAT.getString(TAG_KEY, "");
-        setName = spSCHAT.getString(TAG_NAME, "");
-
-        if (!isSign) sign();
     }
 
     private void contactDialog() {
@@ -82,6 +73,40 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         dContact.setContentView(R.layout.dialog_contact);
         dContact.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dContact.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        RecyclerView rvContact = dContact.findViewById(R.id.cName);
+        rvContact.setLayoutManager(new LinearLayoutManager(context));
+        // Set to Adapter from Data Account
+        ContactAdapter contactAdapter = new ContactAdapter(jsonObjectArrayList2, context);
+        rvContact.setAdapter(contactAdapter);
+//        contactAdapter.setClickListener(MainActivity.this);
+
+        EditText etName = dContact.findViewById(R.id.cFind);
+        LinearLayout llClear = dContact.findViewById(R.id.cClear);
+        etName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                contactAdapter.getFilter().filter(editable);
+                if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
+                else llClear.setVisibility(View.VISIBLE);
+            }
+        });
+
+        llClear.setOnClickListener(v1 -> {
+            etName.setText("");
+            llClear.setVisibility(View.GONE);
+            contactAdapter.getFilter().filter("");
+        });
 
         dContact.findViewById(R.id.cAdd).setOnClickListener(v -> addContactDialog());
         dContact.findViewById(R.id.cClose).setOnClickListener(v -> dContact.dismiss());
@@ -149,6 +174,9 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         TextView tvName = dMenu.findViewById(R.id.mName);
         tvName.setText(spSCHAT.getString(TAG_NAME, ""));
 
+        CircleImageView civPhoto = dMenu.findViewById(R.id.mPhoto);
+        profile(civPhoto);
+
         RecyclerView rvAcc = dMenu.findViewById(R.id.maSub1);
         rvAcc.setLayoutManager(new LinearLayoutManager(context));
         // Set to Adapter from Data Account
@@ -184,6 +212,41 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         });
 
         dMenu.show();
+    }
+
+    private void profile(CircleImageView civPhoto) {
+        String add_contact = "{\"request\":\"profile\",\"data\":{\"key\":\""+setKey+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                String photo = BASE_PHOTO + jsonObject.getString("photo");
+                                if (!photo.equals(BASE_PHOTO)) Glide.with(context)
+                                        .load(photo)
+                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .skipMemoryCache(true)
+                                        .into(civPhoto);
+                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sign() {
@@ -315,6 +378,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                             .putString(TAG_NAME, setName)
                                             .putString(TAG_ACC, String.valueOf(jsonObjectArrayList))
                                             .commit();
+                                    // Load Contact
+                                    loadContact();
                                     dSign.dismiss();
                                     Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                                 } else Toast.makeText(context, "You're already logged in", Toast.LENGTH_SHORT).show();
@@ -352,6 +417,38 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         }
     }
 
+    private void loadContact() {
+        String add_contact = "{\"request\":\"contact\",\"data\":{\"key\":\""+setKey+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                jsonObjectArrayList2 = new ArrayList<>();
+                                for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList2.add(jsonArray.getJSONObject(i));
+                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onItemClick(JSONObject jsonObject) {
         try {
@@ -359,6 +456,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                     .putString(TAG_KEY, jsonObject.getString("key"))
                     .putString(TAG_NAME, jsonObject.getString("name"))
                     .commit();
+            setKey = jsonObject.getString("key");
             dMenu.dismiss();
         } catch (JSONException e) {
             e.printStackTrace();
@@ -368,6 +466,15 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     @Override
     protected void onStart() {
         super.onStart();
+        context = MainActivity.this;
+
+        spSCHAT = getSharedPreferences(SCHAT, MODE_PRIVATE);
+        isSign = spSCHAT.getBoolean(TAG_SIGN, false);
+        setKey = spSCHAT.getString(TAG_KEY, "");
+        setName = spSCHAT.getString(TAG_NAME, "");
+
+        if (!isSign) sign();
         loadAcc();
+        if (!setKey.equals("")) loadContact();
     }
 }

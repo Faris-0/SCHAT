@@ -62,7 +62,7 @@ if ($data['request'] == "login") {
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username' AND `password`='$password'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "key" => $object->key, "name" => $object->name, "message" => "Login Success!");
+        $response = array("status" => true, "key" => $object->key, "name" => $object->name, "photo" => $object->photo, "message" => "Login Success!");
         echo json_encode($response);
     } else {
         $response = array("status" => false, "message" => "Login Failed!");
@@ -119,6 +119,30 @@ if ($data['request'] == "profile") {
     }
 }
 
+// Contact
+// {
+//     "request" : "contact",
+//     "data" : {
+//         "key" : ""
+//     }
+// }
+//
+if ($data['request'] == "contact") {
+    $key = $data['data']['key'];
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`photo` FROM `contact`, `user` WHERE `contact`.`username`=`user`.`username` AND `contact`.`key`='$key'");
+    $rows = array();
+    while($r = mysqli_fetch_assoc($query)) {
+        $rows[] = $r;
+    }
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "data" => $rows);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => false, "message" => "Data Not Found!");
+        echo json_encode($response);
+    }
+}
+
 // Edit Name
 // {
 //     "request" : "edit_name",
@@ -161,6 +185,24 @@ if ($data['request'] == "edit_bio") {
         $response = array("status" => false);
         echo json_encode($response);
     }
+}
+
+// Edit Photo
+// {
+//     "request" : "edit_photo",
+//     "data" : {
+//         "key" : "",
+//         "photo" : ""
+//     }
+// }
+//
+if ($data['request'] == "edit_photo") {
+    $key = $data['data']['key'];
+    $photo = $data['data']['photo'];
+    $sphoto = 'SCHAT-' . $key . ".jpeg";
+    $path = './photo/' . $sphoto;
+    file_put_contents($path, base64_decode($photo));
+    $query = mysqli_query($conn, "UPDATE `user` SET `photo` = '$sphoto' WHERE `key` = '$key'");
 }
 
 $conn->close();

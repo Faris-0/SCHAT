@@ -61,7 +61,7 @@
             android:layout_height="@dimen/_70sdp"
             android:layout_marginBottom="@dimen/_12sdp"
             android:layout_gravity="center"
-            android:src="@drawable/avatar" />
+            android:src="@drawable/photo" />
 
         <LinearLayout
             android:layout_width="match_parent"

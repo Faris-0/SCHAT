@@ -54,8 +54,6 @@ CREATE TABLE `user` (
 --
 -- Indexes for table `contact`
 --
-ALTER TABLE `contact`
-  ADD PRIMARY KEY (`key`);
 
 --
 -- Indexes for table `user`
