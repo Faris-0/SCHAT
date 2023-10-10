@@ -30,7 +30,7 @@ if ($data['request'] == "register") {
     $name = $data['data']['name'];
     $username = $data['data']['username'];
     $password = md5(md5($data['data']['password'], true));
-    $key = md5(md5($username."+".$password, true));
+    $key = md5(md5($username."+".$password."+".time(), true));
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => false, "message" => "Username has been taken!");
@@ -70,34 +70,6 @@ if ($data['request'] == "login") {
     }
 }
 
-// Add Contact
-// {
-//     "request" : "add_contact",
-//     "data" : {
-//         "key" : "",
-//         "username" : ""
-//     }
-// }
-//
-if ($data['request'] == "add_contact") {
-    $key = $data['data']['key'];
-    $username = $data['data']['username'];
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
-    if (mysqli_affected_rows($conn) == 0) {
-        $response = array("status" => false, "message" => "Username Not Found!");
-        echo json_encode($response);
-    } else {
-        $query = mysqli_query($conn, "INSERT INTO `contact` (`key`, `username`) VALUES ('$key', '$username')");
-        if (mysqli_affected_rows($conn)) {
-            $response = array("status" => true, "message" => "Add Contact Success!");
-            echo json_encode($response);
-        } else {
-            $response = array("status" => false, "message" => "Add Contact Failed!");
-            echo json_encode($response);
-        }
-    }
-}
-
 // Profile
 // {
 //     "request" : "profile",
@@ -119,6 +91,40 @@ if ($data['request'] == "profile") {
     }
 }
 
+// Add Contact
+// {
+//     "request" : "add_contact",
+//     "data" : {
+//         "key" : "",
+//         "username" : ""
+//     }
+// }
+//
+if ($data['request'] == "add_contact") {
+    $key = $data['data']['key'];
+    $username = $data['data']['username'];
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
+    if (mysqli_affected_rows($conn) == 0) {
+        $response = array("status" => false, "message" => "Username Not Found!");
+        echo json_encode($response);
+    } else {
+        $query = mysqli_query($conn, "SELECT * FROM `contact` WHERE `key`='$key' AND `username`='$username'");
+        if (mysqli_affected_rows($conn)) {
+            $response = array("status" => false, "message" => "Username Already Added!");
+            echo json_encode($response);
+        } else {
+            $query = mysqli_query($conn, "INSERT INTO `contact` (`key`, `username`) VALUES ('$key', '$username')");
+            if (mysqli_affected_rows($conn)) {
+                $response = array("status" => true, "message" => "Add Contact Success!");
+                echo json_encode($response);
+            } else {
+                $response = array("status" => false, "message" => "Add Contact Failed!");
+                echo json_encode($response);
+            }
+        }
+    }
+}
+
 // Contact
 // {
 //     "request" : "contact",
@@ -129,7 +135,7 @@ if ($data['request'] == "profile") {
 //
 if ($data['request'] == "contact") {
     $key = $data['data']['key'];
-    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`photo` FROM `contact`, `user` WHERE `contact`.`username`=`user`.`username` AND `contact`.`key`='$key'");
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo` FROM `contact`, `user` WHERE `contact`.`username`=`user`.`username` AND `contact`.`key`='$key'");
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) {
         $rows[] = $r;
@@ -138,7 +144,80 @@ if ($data['request'] == "contact") {
         $response = array("status" => true, "data" => $rows);
         echo json_encode($response);
     } else {
-        $response = array("status" => false, "message" => "Data Not Found!");
+        $response = array("status" => true, "data" => $rows);
+        echo json_encode($response);
+    }
+}
+
+// Add Message
+// {
+//     "request" : "add_message",
+//     "data" : {
+//         "key" : "",
+//         "username" : ""
+//     }
+// }
+//
+if ($data['request'] == "add_message") {
+    $key = $data['data']['key'];
+    $username = $data['data']['username'];
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
+    $object = mysqli_fetch_object($query);
+    if (mysqli_affected_rows($conn)) {
+        // $response = array("status" => true, "key" => $object->key);
+        // echo json_encode($response);
+        $id = md5(md5($key."+".$object->key."+".time(), true));
+        $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`) VALUES ('$key', '$id', '1'), ('$object->key', '$id', '0')");
+        if (mysqli_affected_rows($conn)) {
+            $response = array("status" => true);
+            echo json_encode($response);
+        } else {
+            $response = array("status" => false);
+            echo json_encode($response);
+        }
+    }
+}
+
+// Message
+// {
+//     "request" : "message",
+//     "data" : {
+//         "key" : ""
+//     }
+// }
+//
+if ($data['request'] == "message") {
+    $key = $data['data']['key'];
+    $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
+    $rows = array();
+    while($r = mysqli_fetch_assoc($query)) {
+        $rows[] = $r;
+    }
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "data" => $rows);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => true, "data" => $rows);
+        echo json_encode($response);
+    }
+}
+
+// Message Detail
+// {
+//     "request" : "message_detail",
+//     "data" : {
+//         "key" : "",
+//         "id" : ""
+//     }
+// }
+//
+if ($data['request'] == "message_detail") {
+    $key = $data['data']['key'];
+    $id = $data['data']['id'];
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo` FROM `message`, `user` WHERE `message`.`key`=`user`.`key` AND `message`.`id`='$id' AND `message`.`key`!='$key'");
+    $object = mysqli_fetch_object($query);
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo);
         echo json_encode($response);
     }
 }

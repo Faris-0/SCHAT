@@ -25,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -34,7 +33,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yuuna.schat.adapter.AccountAdapter;
 import com.yuuna.schat.adapter.ContactAdapter;
+import com.yuuna.schat.adapter.MessageAdapter;
 import com.yuuna.schat.util.Client;
+import com.yuuna.schat.util.CustomLinearLayoutManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,15 +46,19 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends Activity implements AccountAdapter.ItemClickListener {
+public class MainActivity extends Activity implements AccountAdapter.ItemClickListener, ContactAdapter.ItemClickListener, MessageAdapter.ItemClickListener {
 
-    private EditText etUsername;
+    private EditText etUsername, etFind;
+    private LinearLayout llToolbar, llFind, llClear;
+    private RecyclerView rvMessage;
 
     private Context context;
     private Dialog dMenu, dSign, dContact, dAddContact;
     private SharedPreferences spSCHAT;
 
-    private ArrayList<JSONObject> jsonObjectArrayList, jsonObjectArrayList2;
+    private MessageAdapter messageAdapter;
+
+    private ArrayList<JSONObject> jsonObjectArrayList, jsonObjectArrayList2, jsonObjectArrayList3, jsonObjectArrayList4;
 
     private String dataAcc, setKey, setName;
     private Boolean isAccount, isSign;
@@ -65,6 +70,51 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
         findViewById(R.id.mMenu).setOnClickListener(v -> menuDialog());
         findViewById(R.id.mContact).setOnClickListener(v -> contactDialog());
+
+        llToolbar = findViewById(R.id.mToolbar);
+        llFind = findViewById(R.id.mfLayout);
+        etFind = findViewById(R.id.mfFind);
+        llClear = findViewById(R.id.mfClear);
+        rvMessage = findViewById(R.id.mMessage);
+
+        rvMessage.setLayoutManager(new CustomLinearLayoutManager(context));
+
+        findViewById(R.id.mFind).setOnClickListener(v -> {
+            llToolbar.setVisibility(View.GONE);
+            findViewById(R.id.mfLayout).setVisibility(View.VISIBLE);
+        });
+        findViewById(R.id.mfBack).setOnClickListener(v -> {
+            llToolbar.setVisibility(View.VISIBLE);
+            llFind.setVisibility(View.GONE);
+            //
+            etFind.setText("");
+            llClear.setVisibility(View.GONE);
+            messageAdapter.getFilter().filter("");
+        });
+        etFind.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                messageAdapter.getFilter().filter(editable);
+                if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
+                else llClear.setVisibility(View.VISIBLE);
+            }
+        });
+
+        llClear.setOnClickListener(v1 -> {
+            etFind.setText("");
+            llClear.setVisibility(View.GONE);
+            messageAdapter.getFilter().filter("");
+        });
     }
 
     private void contactDialog() {
@@ -75,11 +125,12 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         dContact.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         RecyclerView rvContact = dContact.findViewById(R.id.cName);
-        rvContact.setLayoutManager(new LinearLayoutManager(context));
+        rvContact.setLayoutManager(new CustomLinearLayoutManager(context));
         // Set to Adapter from Data Account
+        if (jsonObjectArrayList2 == null) jsonObjectArrayList2 = new ArrayList<>();
         ContactAdapter contactAdapter = new ContactAdapter(jsonObjectArrayList2, context);
         rvContact.setAdapter(contactAdapter);
-//        contactAdapter.setClickListener(MainActivity.this);
+        contactAdapter.setClickListener(MainActivity.this);
 
         EditText etName = dContact.findViewById(R.id.cFind);
         LinearLayout llClear = dContact.findViewById(R.id.cClear);
@@ -144,6 +195,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                                loadContact();
                                 dAddContact.dismiss();
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
@@ -178,7 +230,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         profile(civPhoto);
 
         RecyclerView rvAcc = dMenu.findViewById(R.id.maSub1);
-        rvAcc.setLayoutManager(new LinearLayoutManager(context));
+        rvAcc.setLayoutManager(new CustomLinearLayoutManager(context));
         // Set to Adapter from Data Account
         AccountAdapter accountAdapter = new AccountAdapter(jsonObjectArrayList, context);
         rvAcc.setAdapter(accountAdapter);
@@ -215,8 +267,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void profile(CircleImageView civPhoto) {
-        String add_contact = "{\"request\":\"profile\",\"data\":{\"key\":\""+setKey+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
+        String profile = "{\"request\":\"profile\",\"data\":{\"key\":\""+setKey+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(profile).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
                 @Override
@@ -380,6 +432,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                             .commit();
                                     // Load Contact
                                     loadContact();
+                                    // Load Message
+                                    loadMessage();
                                     dSign.dismiss();
                                     Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                                 } else Toast.makeText(context, "You're already logged in", Toast.LENGTH_SHORT).show();
@@ -450,15 +504,57 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     @Override
-    public void onItemClick(JSONObject jsonObject) {
+    public void onItemClick(JSONObject jsonObject, View view) {
         try {
-            spSCHAT.edit()
-                    .putString(TAG_KEY, jsonObject.getString("key"))
-                    .putString(TAG_NAME, jsonObject.getString("name"))
-                    .commit();
-            setKey = jsonObject.getString("key");
-            dMenu.dismiss();
+            Integer id = view.getId();
+            if (id == R.id.cButton) {
+                createMessage(jsonObject.getString("username"));
+            } else if (id == R.id.aButton) {
+                spSCHAT.edit()
+                        .putString(TAG_KEY, jsonObject.getString("key"))
+                        .putString(TAG_NAME, jsonObject.getString("name"))
+                        .commit();
+                setKey = jsonObject.getString("key");
+                // Load Contact
+                loadContact();
+                // Load Message
+                loadMessage();
+                dMenu.dismiss();
+            } else if (id == R.id.mButton) {
+                startActivity(new Intent(context, ChatActivity.class));
+            }
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createMessage(String username) {
+        String add_message = "{\"request\":\"add_message\",\"data\":{\"key\":\""+setKey+"\",\"username\":\""+username+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(add_message).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            if (new JSONObject(response).getBoolean("status")) {
+                                // Load Message
+                                loadMessage();
+                                dContact.dismiss();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -476,5 +572,94 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         if (!isSign) sign();
         loadAcc();
         if (!setKey.equals("")) loadContact();
+        loadMessage();
+    }
+
+    private void loadMessage() {
+        String message = "{\"request\":\"message\",\"data\":{\"key\":\""+setKey+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                jsonObjectArrayList3 = new ArrayList<>();
+                                for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList3.add(jsonArray.getJSONObject(i));
+                                jsonObjectArrayList4 = new ArrayList<>();
+                                if (jsonObjectArrayList3.size() == 0) {
+                                    // Set to Adapter from Data Account
+                                    messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
+                                    rvMessage.setAdapter(messageAdapter);
+                                    messageAdapter.setClickListener(MainActivity.this);
+                                } else {
+                                    for (int i = 0; i < jsonObjectArrayList3.size(); i++) {
+                                        loadMessageDetail(jsonObjectArrayList3.get(i).getString("id"));
+                                    }
+                                }
+                                // Test
+//                                RecyclerView rvMessage = findViewById(R.id.mMessage);
+//                                rvMessage.setLayoutManager(new CustomLinearLayoutManager(context));
+//                                // Set to Adapter from Data Account
+//                                messageAdapter = new MessageAdapter(jsonObjectArrayList3, context);
+//                                rvMessage.setAdapter(messageAdapter);
+////                                messageAdapter.setClickListener(MainActivity.this);
+                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadMessageDetail(String id) {
+        String message_detail = "{\"request\":\"message_detail\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                JSONObject object = new JSONObject()
+                                        .put("name", jsonObject.getString("name"))
+                                        .put("username", jsonObject.getString("name"))
+                                        .put("photo", jsonObject.getString("photo"));
+                                jsonObjectArrayList4.add(object);
+                                // Set to Adapter from Data Account
+                                messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
+                                rvMessage.setAdapter(messageAdapter);
+                                messageAdapter.setClickListener(MainActivity.this);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

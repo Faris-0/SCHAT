@@ -79,7 +79,7 @@
                 <LinearLayout
                     android:layout_width="@dimen/_25sdp"
                     android:layout_height="@dimen/_25sdp"
-                    android:gravity="center" >
+                    android:gravity="center">
 
                     <ImageView
                         android:layout_width="@dimen/_17sdp"
@@ -115,7 +115,7 @@
                     <ImageView
                         android:layout_width="@dimen/_17sdp"
                         android:layout_height="@dimen/_17sdp"
-                        android:src="@android:drawable/ic_menu_close_clear_cancel" />
+                        android:src="@drawable/ic_close" />
                 </LinearLayout>
             </LinearLayout>
 

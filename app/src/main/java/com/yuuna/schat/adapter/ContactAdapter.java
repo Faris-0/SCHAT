@@ -96,7 +96,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.Holder> 
     }
 
     public interface ItemClickListener {
-        void onItemClick(JSONObject jsonObject);
+        void onItemClick(JSONObject jsonObject, View view);
     }
 
     public void setClickListener(ItemClickListener clickListener) {
@@ -111,8 +111,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.Holder> 
             super(itemView);
             civPhoto = itemView.findViewById(R.id.cPhoto);
             tvName = itemView.findViewById(R.id.cName);
-            itemView.setOnClickListener(v -> {
-                if (clickListener != null) clickListener.onItemClick(listContact.get(getBindingAdapterPosition()));
+            itemView.findViewById(R.id.cButton).setOnClickListener(v -> {
+                if (clickListener != null) clickListener.onItemClick(listContact.get(getBindingAdapterPosition()), v);
             });
         }
     }

@@ -3,10 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/_8sdp"
-    android:orientation="horizontal">
+    android:id="@+id/mButton"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_button_4">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/cProfile"
+        android:id="@+id/mPhoto"
         android:layout_width="@dimen/_35sdp"
         android:layout_height="@dimen/_35sdp"
         android:src="@drawable/photo" />
@@ -19,10 +21,10 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/cNama"
+            android:id="@+id/mName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nama Pengguna"
+            android:text="Name"
             android:textColor="@color/black"
             android:textSize="@dimen/_12ssp"
             android:textStyle="bold"
@@ -30,10 +32,10 @@
             android:ellipsize="end" />
 
         <TextView
-            android:id="@+id/cIsi"
+            android:id="@+id/mContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Isi Chat"
+            android:text="Contents"
             android:textColor="@color/gray"
             android:textSize="@dimen/_12ssp"
             android:textStyle="bold"
@@ -49,10 +51,10 @@
         android:gravity="end">
 
         <TextView
-            android:id="@+id/cWaktu"
+            android:id="@+id/mTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Waktu"
+            android:text="Time"
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/gray"

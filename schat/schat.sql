@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 06, 2023 at 04:45 AM
+-- Generation Time: Oct 10, 2023 at 08:25 AM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 8.0.7
 
@@ -35,6 +35,32 @@ CREATE TABLE `contact` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `message`
+--
+
+CREATE TABLE `message` (
+  `key` varchar(255) NOT NULL,
+  `id` varchar(255) NOT NULL,
+  `open` int(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `message_detail`
+--
+
+CREATE TABLE `message_detail` (
+  `id` varchar(255) NOT NULL,
+  `chat` text NOT NULL,
+  `send` varchar(255) NOT NULL,
+  `time` int(11) NOT NULL,
+  `view` int(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user`
 --
 
@@ -52,8 +78,10 @@ CREATE TABLE `user` (
 --
 
 --
--- Indexes for table `contact`
+-- Indexes for table `message_detail`
 --
+ALTER TABLE `message_detail`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `user`

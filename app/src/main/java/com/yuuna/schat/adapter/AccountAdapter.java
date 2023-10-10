@@ -61,8 +61,8 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
     }
 
     private void profile(String key, CircleImageView civPhoto) {
-        String add_contact = "{\"request\":\"profile\",\"data\":{\"key\":\""+key+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
+        String profile = "{\"request\":\"profile\",\"data\":{\"key\":\""+key+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(profile).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
                 @Override
@@ -102,7 +102,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
     }
 
     public interface ItemClickListener {
-        void onItemClick(JSONObject jsonObject);
+        void onItemClick(JSONObject jsonObject, View view);
     }
 
     public void setClickListener(ItemClickListener clickListener) {
@@ -119,8 +119,8 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
             civPhoto = itemView.findViewById(R.id.aPhoto);
             ivSelect = itemView.findViewById(R.id.aSelect);
             tvName = itemView.findViewById(R.id.aName);
-            itemView.setOnClickListener(v -> {
-                if (clickListener != null) clickListener.onItemClick(jsonObjectDataList.get(getBindingAdapterPosition()));
+            itemView.findViewById(R.id.aButton).setOnClickListener(v -> {
+                if (clickListener != null) clickListener.onItemClick(jsonObjectDataList.get(getBindingAdapterPosition()), v);
             });
         }
     }
