@@ -1,5 +1,6 @@
 package com.yuuna.schat;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.SharedPref.TAG_ACC;
@@ -13,8 +14,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +28,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -36,6 +42,7 @@ import com.yuuna.schat.adapter.ContactAdapter;
 import com.yuuna.schat.adapter.MessageAdapter;
 import com.yuuna.schat.util.Client;
 import com.yuuna.schat.util.CustomLinearLayoutManager;
+import com.yuuna.schat.util.schatService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,6 +74,16 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(this, POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{POST_NOTIFICATIONS}, 1);
+        }
+        // Running Service
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(this, schatService.class));
+        } else {
+            startService(new Intent(this, schatService.class));
+        }
 
         findViewById(R.id.mMenu).setOnClickListener(v -> menuDialog());
         findViewById(R.id.mContact).setOnClickListener(v -> contactDialog());
@@ -521,7 +538,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 loadMessage();
                 dMenu.dismiss();
             } else if (id == R.id.mButton) {
-                startActivity(new Intent(context, ChatActivity.class));
+                startActivity(new Intent(context, ChatActivity.class).putExtra("id", jsonObject.getString("id")));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -573,6 +590,12 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         loadAcc();
         if (!setKey.equals("")) loadContact();
         loadMessage();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (dSign != null) dSign.dismiss();
     }
 
     private void loadMessage() {
@@ -638,6 +661,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 JSONObject object = new JSONObject()
+                                        .put("id", id)
                                         .put("name", jsonObject.getString("name"))
                                         .put("username", jsonObject.getString("name"))
                                         .put("photo", jsonObject.getString("photo"));

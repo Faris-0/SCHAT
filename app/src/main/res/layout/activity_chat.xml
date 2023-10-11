@@ -30,7 +30,7 @@
                 android:rotation="180" />
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/cAvatar"
+                android:id="@+id/cPhoto"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:src="@drawable/photo" />
@@ -84,20 +84,20 @@
                 android:layout_height="match_parent"
                 android:background="@color/light_gray"
                 tools:listitem="@layout/item_chat"
-                tools:itemCount="13"/>
+                tools:itemCount="15"/>
 
             <LinearLayout
-                android:id="@+id/mDetail"
+                android:id="@+id/cDown"
                 android:layout_width="@dimen/_28sdp"
                 android:layout_height="@dimen/_28sdp"
-                android:layout_margin="@dimen/_8sdp"
-                android:gravity="center"
-                android:background="@drawable/bg_button_1"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true">
+                android:visibility="gone"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/bg_button_1"
+                android:gravity="center">
 
                 <ImageView
-                    android:id="@+id/mIcon"
                     android:layout_width="@dimen/_12sdp"
                     android:layout_height="@dimen/_12sdp"
                     android:src="@drawable/ic_double_arrow" />

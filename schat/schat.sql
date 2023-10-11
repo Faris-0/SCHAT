@@ -70,7 +70,8 @@ CREATE TABLE `user` (
   `username` varchar(32) NOT NULL,
   `password` varchar(255) NOT NULL,
   `photo` varchar(255) NOT NULL,
-  `bio` varchar(70) NOT NULL
+  `bio` varchar(70) NOT NULL,
+  `last_online` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --

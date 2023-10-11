@@ -284,5 +284,27 @@ if ($data['request'] == "edit_photo") {
     $query = mysqli_query($conn, "UPDATE `user` SET `photo` = '$sphoto' WHERE `key` = '$key'");
 }
 
+// Edit Last Online
+// {
+//     "request" : "edit_last_online",
+//     "data" : {
+//         "key" : "",
+//         "last_online" : ""
+//     }
+// }
+//
+if ($data['request'] == "edit_last_online") {
+    $key = $data['data']['key'];
+    $last_online = $data['data']['last_online'];
+    $query = mysqli_query($conn, "UPDATE `user` SET `last_online` = '$last_online' WHERE `key` = '$key'");
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => false);
+        echo json_encode($response);
+    }
+}
+
 $conn->close();
 ?>
