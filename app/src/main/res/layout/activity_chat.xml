@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -51,8 +50,9 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_12ssp"
+                android:textSize="@dimen/_13ssp"
                 android:textStyle="bold"
+                android:includeFontPadding="false"
                 android:gravity="center_vertical" />
 
             <TextView
@@ -79,7 +79,7 @@
             android:layout_weight="0.9">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/cChat"
+                android:id="@+id/cChats"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/light_gray"
@@ -119,13 +119,13 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/rName"
+                    android:id="@+id/cInputChat"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/_25sdp"
+                    android:layout_height="@dimen/_30sdp"
                     android:paddingHorizontal="@dimen/_8sdp"
                     android:hint="Pesan"
-                    android:textColorHint="@color/white"
-                    android:textSize="@dimen/_12ssp"
+                    android:textColorHint="@color/light_gray"
+                    android:textSize="@dimen/_13ssp"
                     android:textColor="@color/white"
                     android:gravity="center_vertical"
                     android:singleLine="true"
@@ -134,8 +134,8 @@
 
             <LinearLayout
                 android:id="@+id/cSend"
-                android:layout_width="@dimen/_35sdp"
-                android:layout_height="@dimen/_35sdp"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:background="@drawable/bg_button_1">

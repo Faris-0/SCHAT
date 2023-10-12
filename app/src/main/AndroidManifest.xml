@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".util.schatService" android:stopWithTask="false"/>
+        <service android:name=".util.schatService" />
         <activity android:name=".SettingActivity" />
         <activity android:name=".ChatActivity" />
     </application>

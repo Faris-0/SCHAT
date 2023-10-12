@@ -164,16 +164,33 @@ if ($data['request'] == "add_message") {
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        // $response = array("status" => true, "key" => $object->key);
-        // echo json_encode($response);
-        $id = md5(md5($key."+".$object->key."+".time(), true));
-        $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`) VALUES ('$key', '$id', '1'), ('$object->key', '$id', '0')");
+        $id1 = md5(md5($key."+".$object->key, true));
+        $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id`='$id1'");
         if (mysqli_affected_rows($conn)) {
-            $response = array("status" => true);
-            echo json_encode($response);
-        } else {
             $response = array("status" => false);
             echo json_encode($response);
+        } else {
+            $id2 = md5(md5($object->key."+".$key, true));
+            $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id`='$id2'");
+            if (mysqli_affected_rows($conn)) {
+                $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1' WHERE `key` = '$key'");
+                if (mysqli_affected_rows($conn)) {
+                    $response = array("status" => true);
+                    echo json_encode($response);
+                } else {
+                    $response = array("status" => false);
+                    echo json_encode($response);
+                }
+            } else {
+                $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`, `send`) VALUES ('$key', '$id1', '1', '0'), ('$object->key', '$id1', '0', '1')");
+                if (mysqli_affected_rows($conn)) {
+                    $response = array("status" => true);
+                    echo json_encode($response);
+                } else {
+                    $response = array("status" => false);
+                    echo json_encode($response);
+                }
+            }
         }
     }
 }
@@ -214,10 +231,86 @@ if ($data['request'] == "message") {
 if ($data['request'] == "message_detail") {
     $key = $data['data']['key'];
     $id = $data['data']['id'];
-    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo` FROM `message`, `user` WHERE `message`.`key`=`user`.`key` AND `message`.`id`='$id' AND `message`.`key`!='$key'");
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo`, `user`.`last_online`, `user`.`private` FROM `message`, `user` WHERE `message`.`key`=`user`.`key` AND `message`.`id`='$id' AND `message`.`key`!='$key'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo);
+        $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private);
+        echo json_encode($response);
+    }
+}
+
+// Sender
+// {
+//     "request" : "sender",
+//     "data" : {
+//         "key" : "",
+//         "id" : ""
+//     }
+// }
+//
+if ($data['request'] == "sender") {
+    $key = $data['data']['key'];
+    $id = $data['data']['id'];
+    $query = mysqli_query($conn, "SELECT `message`.`send` FROM `message` WHERE `message`.`id`='$id' AND `message`.`key`='$key'");
+    $object = mysqli_fetch_object($query);
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "send" => $object->send);
+        echo json_encode($response);
+    }
+}
+
+// Chats
+// {
+//     "request" : "chats",
+//     "data" : {
+//         "id" : ""
+//     }
+// }
+//
+if ($data['request'] == "chats") {
+    $id = $data['data']['id'];
+    $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `message_detail`.`id`='$id'");
+    $rows = array();
+    while($r = mysqli_fetch_assoc($query)) {
+        $rows[] = $r;
+    }
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true, "data" => $rows);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => true, "data" => $rows);
+        echo json_encode($response);
+    }
+}
+
+// Send Chat
+// {
+//     "request" : "send_chat",
+//     "data" : {
+//         "id" : "",
+//         "chat" : "",
+//         "send" : "",
+//         "time" : ""
+//     }
+// }
+//
+if ($data['request'] == "send_chat") {
+    $id = $data['data']['id'];
+    $chat = $data['data']['chat'];
+    $send = $data['data']['send'];
+    $time = $data['data']['time'];
+    $query = mysqli_query($conn, "INSERT INTO `message_detail` (`id`, `chat`, `send`, `time`) VALUES ('$id', '$chat', '$send', '$time')");
+    if (mysqli_affected_rows($conn)) {
+        $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1' WHERE `id` = '$id'");
+        if (mysqli_affected_rows($conn)) {
+            $response = array("status" => true);
+            echo json_encode($response);
+        } else {
+            $response = array("status" => true);
+            echo json_encode($response);
+        }
+    } else {
+        $response = array("status" => false);
         echo json_encode($response);
     }
 }
@@ -297,6 +390,28 @@ if ($data['request'] == "edit_last_online") {
     $key = $data['data']['key'];
     $last_online = $data['data']['last_online'];
     $query = mysqli_query($conn, "UPDATE `user` SET `last_online` = '$last_online' WHERE `key` = '$key'");
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => false);
+        echo json_encode($response);
+    }
+}
+
+// Edit Private
+// {
+//     "request" : "edit_private",
+//     "data" : {
+//         "key" : "",
+//         "edit_private" : ""
+//     }
+// }
+//
+if ($data['request'] == "edit_private") {
+    $key = $data['data']['key'];
+    $private = $data['data']['private'];
+    $query = mysqli_query($conn, "UPDATE `user` SET `private` = '$private' WHERE `key` = '$key'");
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true);
         echo json_encode($response);

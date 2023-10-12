@@ -41,7 +41,8 @@ CREATE TABLE `contact` (
 CREATE TABLE `message` (
   `key` varchar(255) NOT NULL,
   `id` varchar(255) NOT NULL,
-  `open` int(1) NOT NULL
+  `open` int(1) NOT NULL.
+  `send` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -81,8 +82,6 @@ CREATE TABLE `user` (
 --
 -- Indexes for table `message_detail`
 --
-ALTER TABLE `message_detail`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `user`

@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -538,9 +539,44 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 loadMessage();
                 dMenu.dismiss();
             } else if (id == R.id.mButton) {
-                startActivity(new Intent(context, ChatActivity.class).putExtra("id", jsonObject.getString("id")));
+                Log.d("HEHEHEHE", jsonObject.getString("id"));
+                loadSend(jsonObject.getString("id"));
+                //startActivity(new Intent(context, ChatActivity.class).putExtra("id", jsonObject.getString("id")));
             }
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSend(String id) {
+        String sender = "{\"request\":\"sender\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(sender).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    runOnUiThread(() -> {
+                        // Response
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                startActivity(new Intent(context, ChatActivity.class)
+                                        .putExtra("id", id)
+                                        .putExtra("send", jsonObject.getInt("send"))
+                                );
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

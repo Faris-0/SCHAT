@@ -18,7 +18,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -48,7 +47,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -99,6 +97,7 @@ public class SettingActivity extends Activity {
         });
         findViewById(R.id.sBName).setOnClickListener(v -> nameDialog());
         findViewById(R.id.sBBio).setOnClickListener(v -> bioDialog());
+        sHide.setOnCheckedChangeListener((compoundButton, b) -> setPrivate(b));
         findViewById(R.id.sBSignOut).setOnClickListener(v -> {
             try {
                 for (int i = 0; i < jsonObjectArrayList.size(); i++) {
@@ -126,6 +125,29 @@ public class SettingActivity extends Activity {
 
         profile();
         loadAcc();
+    }
+
+    private void setPrivate(boolean isPrivate) {
+        Integer iPrivate;
+        if (isPrivate) iPrivate = 1;
+        else iPrivate = 0;
+        String last_online = "{\"request\":\"edit_private\",\"data\":{\"key\":\""+setKey+"\",\"private\":\""+iPrivate+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(last_online).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadAcc() {
