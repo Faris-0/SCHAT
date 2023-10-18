@@ -21,7 +21,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -30,7 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -539,9 +537,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 loadMessage();
                 dMenu.dismiss();
             } else if (id == R.id.mButton) {
-                Log.d("HEHEHEHE", jsonObject.getString("id"));
                 loadSend(jsonObject.getString("id"));
-                //startActivity(new Intent(context, ChatActivity.class).putExtra("id", jsonObject.getString("id")));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -660,13 +656,6 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                         loadMessageDetail(jsonObjectArrayList3.get(i).getString("id"));
                                     }
                                 }
-                                // Test
-//                                RecyclerView rvMessage = findViewById(R.id.mMessage);
-//                                rvMessage.setLayoutManager(new CustomLinearLayoutManager(context));
-//                                // Set to Adapter from Data Account
-//                                messageAdapter = new MessageAdapter(jsonObjectArrayList3, context);
-//                                rvMessage.setAdapter(messageAdapter);
-////                                messageAdapter.setClickListener(MainActivity.this);
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             e.printStackTrace();

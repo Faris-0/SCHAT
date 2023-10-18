@@ -1,7 +1,6 @@
 package com.yuuna.schat.adapter;
 
 import static com.yuuna.schat.ChatActivity.send;
-import static com.yuuna.schat.util.Client.BASE_PHOTO;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -15,16 +14,12 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.yuuna.schat.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implements Filterable {
 
