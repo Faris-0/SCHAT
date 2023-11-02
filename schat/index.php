@@ -83,7 +83,7 @@ if ($data['request'] == "profile") {
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `key`='$key'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "name" => $object->name, "photo" => $object->photo, "bio" => $object->bio);
+        $response = array("status" => true, "name" => $object->name, "photo" => $object->photo, "bio" => $object->bio, "private" => $object->private);
         echo json_encode($response);
     } else {
         $response = array("status" => false, "message" => "Data Not Found!");

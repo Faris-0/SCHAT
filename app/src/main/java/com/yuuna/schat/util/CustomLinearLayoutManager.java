@@ -20,7 +20,7 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         try {
             super.onLayoutChildren(recycler, state);
-        } catch (IndexOutOfBoundsException i) {
+        } catch (IndexOutOfBoundsException | NullPointerException | IllegalStateException i) {
             i.printStackTrace();
         }
     }

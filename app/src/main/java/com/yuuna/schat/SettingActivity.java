@@ -320,6 +320,8 @@ public class SettingActivity extends Activity {
 
                                 bio = jsonObject.getString("bio");
                                 if (!bio.equals("")) tvABio.setText(bio);
+
+                                if (jsonObject.getInt("private") == 1) sHide.setChecked(true);
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
