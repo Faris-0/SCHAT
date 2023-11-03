@@ -137,9 +137,7 @@ if ($data['request'] == "contact") {
     $key = $data['data']['key'];
     $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo` FROM `contact`, `user` WHERE `contact`.`username`=`user`.`username` AND `contact`.`key`='$key'");
     $rows = array();
-    while($r = mysqli_fetch_assoc($query)) {
-        $rows[] = $r;
-    }
+    while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "data" => $rows);
         echo json_encode($response);
@@ -207,9 +205,7 @@ if ($data['request'] == "message") {
     $key = $data['data']['key'];
     $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
     $rows = array();
-    while($r = mysqli_fetch_assoc($query)) {
-        $rows[] = $r;
-    }
+    while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "data" => $rows);
         echo json_encode($response);
@@ -236,14 +232,9 @@ if ($data['request'] == "message_detail") {
     if (mysqli_affected_rows($conn)) {
         $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `message_detail`.`id`='$id'");
         $rows = array();
-        while($r = mysqli_fetch_assoc($query)) {
-            $rows[] = $r;
-        }
+        while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
         if (mysqli_affected_rows($conn)) {
-            // $response = array("status" => true, "data" => $rows);
-            // echo json_encode($response);
-            //
-            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private, "last_message" => end($rows)['chat'], "last_time" => end($rows)['time']);
+            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private, "last_send" => end($rows)['send'], "last_chat" => end($rows)['chat'], "last_time" => end($rows)['time'], "last_view" => end($rows)['view']);
             echo json_encode($response);
         }
     }
@@ -281,9 +272,7 @@ if ($data['request'] == "chats") {
     $id = $data['data']['id'];
     $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `message_detail`.`id`='$id'");
     $rows = array();
-    while($r = mysqli_fetch_assoc($query)) {
-        $rows[] = $r;
-    }
+    while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "data" => $rows);
         echo json_encode($response);

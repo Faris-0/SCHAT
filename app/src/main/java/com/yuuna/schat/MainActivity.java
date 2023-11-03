@@ -537,14 +537,14 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 loadMessage();
                 dMenu.dismiss();
             } else if (id == R.id.mButton) {
-                loadSend(jsonObject.getString("id"));
+                loadSend(jsonObject.getString("id"), true);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadSend(String id) {
+    private void loadSend(String id, Boolean isStartActivity) {
         String sender = "{\"request\":\"sender\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(sender).getAsJsonObject();
         try {
@@ -556,10 +556,11 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
-                                startActivity(new Intent(context, ChatActivity.class)
+                                Integer send = jsonObject.getInt("send");
+                                if (isStartActivity) startActivity(new Intent(context, ChatActivity.class)
                                         .putExtra("id", id)
-                                        .putExtra("send", jsonObject.getInt("send"))
-                                );
+                                        .putExtra("send", send)
+                                ); else loadMessageDetail(id, send);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -653,7 +654,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                     messageAdapter.setClickListener(MainActivity.this);
                                 } else {
                                     for (int i = 0; i < jsonObjectArrayList3.size(); i++) {
-                                        loadMessageDetail(jsonObjectArrayList3.get(i).getString("id"));
+                                        loadSend(jsonObjectArrayList3.get(i).getString("id"), false);
+//                                        loadMessageDetail(jsonObjectArrayList3.get(i).getString("id"));
                                     }
                                 }
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
@@ -673,7 +675,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         }
     }
 
-    private void loadMessageDetail(String id) {
+    private void loadMessageDetail(String id, Integer send) {
         String message_detail = "{\"request\":\"message_detail\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
         try {
@@ -685,13 +687,18 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
+                                String who;
+                                if (send != jsonObject.getInt("last_send")) who = "YOU";
+                                else who = "ME";
                                 JSONObject object = new JSONObject()
                                         .put("id", id)
                                         .put("name", jsonObject.getString("name"))
                                         .put("username", jsonObject.getString("name"))
                                         .put("photo", jsonObject.getString("photo"))
-                                        .put("last_message", jsonObject.getString("last_message"))
-                                        .put("last_time", jsonObject.getLong("last_time"));
+                                        .put("last_send", who)
+                                        .put("last_chat", jsonObject.getString("last_chat"))
+                                        .put("last_time", jsonObject.getLong("last_time"))
+                                        .put("last_view", jsonObject.getInt("last_view"));
                                 jsonObjectArrayList4.add(object);
                                 // Set to Adapter from Data Account
                                 messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);

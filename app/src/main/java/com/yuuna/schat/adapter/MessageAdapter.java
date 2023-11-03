@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,7 +54,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.Holder> 
                     .into(holder.civPhoto);
             else holder.civPhoto.setImageResource(R.drawable.photo);
             holder.tvName.setText(listMessage.get(position).getString("name"));
-            holder.tvContent.setText(listMessage.get(position).getString("last_message"));
+            if (listMessage.get(position).getString("last_send").equals("ME")) {
+                holder.ivView.setVisibility(View.VISIBLE);
+                if (listMessage.get(position).getInt("last_view") == 0) holder.ivView.setImageResource(R.drawable.ic_check);
+                else holder.ivView.setImageResource(R.drawable.ic_double_check);
+            } else holder.ivView.setVisibility(View.GONE);
+            holder.tvContent.setText(listMessage.get(position).getString("last_chat"));
             Long lTime = jsonObjectDataList.get(position).getLong("last_time");
             String sTime = new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L));
             holder.tvTime.setText(sTime);
@@ -112,11 +118,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.Holder> 
     public class Holder extends RecyclerView.ViewHolder {
         private CircleImageView civPhoto;
         private TextView tvName, tvContent, tvTime;
+        private ImageView ivView;
 
         public Holder(View itemView) {
             super(itemView);
             civPhoto = itemView.findViewById(R.id.mPhoto);
             tvName = itemView.findViewById(R.id.mName);
+            ivView = itemView.findViewById(R.id.mView);
             tvContent = itemView.findViewById(R.id.mContent);
             tvTime = itemView.findViewById(R.id.mTime);
             itemView.findViewById(R.id.mButton).setOnClickListener(v -> {

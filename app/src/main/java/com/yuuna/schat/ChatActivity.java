@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -48,7 +47,7 @@ public class ChatActivity extends Activity {
 
     private String id, setKey;
     public static Integer send;
-    private Boolean isSend = false;
+    private Boolean isBottom = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,24 +131,16 @@ public class ChatActivity extends Activity {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                rvChats.getLayoutManager().onRestoreInstanceState(rvChats.getLayoutManager().onSaveInstanceState());
                                 jsonObjectArrayList = new ArrayList<>();
                                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
                                 chatAdapter = new ChatAdapter(jsonObjectArrayList, context);
                                 rvChats.setAdapter(chatAdapter);
 //                                messageAdapter.setClickListener(ChatActivity.this);
 
-//                                Integer iLast = 0;
-//                                for (int i = 0; i < jsonObjectArrayList.size(); i++) {
-//                                    if (send != jsonObjectArrayList.get(i).getInt("send")
-//                                            && jsonObjectArrayList.get(i).getInt("view") == 0)
-//                                        iLast = i;
-//                                    break;
-//                                }
-//                                rvChats.scrollToPosition(iLast);
-                                if (isSend) {
-                                    rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
-                                    isSend = false;
-                                }
+                                // Auto Scroll to Bottom
+                                if (!isBottom) if (jsonObjectArrayList.size() != 0) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
+                                isBottom = true;
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -181,7 +172,6 @@ public class ChatActivity extends Activity {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 etChat.setText("");
-                                isSend = true;
                                 loadChat();
                             }
                         } catch (JSONException e) {
