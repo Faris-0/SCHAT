@@ -48,6 +48,7 @@ public class ChatActivity extends Activity {
 
     private String id, setKey;
     public static Integer send;
+    private Boolean isSend = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,9 +137,19 @@ public class ChatActivity extends Activity {
                                 chatAdapter = new ChatAdapter(jsonObjectArrayList, context);
                                 rvChats.setAdapter(chatAdapter);
 //                                messageAdapter.setClickListener(ChatActivity.this);
-                                //
-                                Log.d("YAYAYA", String.valueOf(jsonObjectArrayList));
-                                //
+
+//                                Integer iLast = 0;
+//                                for (int i = 0; i < jsonObjectArrayList.size(); i++) {
+//                                    if (send != jsonObjectArrayList.get(i).getInt("send")
+//                                            && jsonObjectArrayList.get(i).getInt("view") == 0)
+//                                        iLast = i;
+//                                    break;
+//                                }
+//                                rvChats.scrollToPosition(iLast);
+                                if (isSend) {
+                                    rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
+                                    isSend = false;
+                                }
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -170,6 +181,7 @@ public class ChatActivity extends Activity {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 etChat.setText("");
+                                isSend = true;
                                 loadChat();
                             }
                         } catch (JSONException e) {

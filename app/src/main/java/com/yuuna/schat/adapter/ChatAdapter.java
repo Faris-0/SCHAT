@@ -3,6 +3,7 @@ package com.yuuna.schat.adapter;
 import static com.yuuna.schat.ChatActivity.send;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,9 @@ import com.yuuna.schat.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implements Filterable {
 
@@ -42,6 +45,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
     public void onBindViewHolder(Holder holder, int position) {
         try {
             holder.tvChat.setText(jsonObjectDataList.get(position).getString("chat"));
+            Long lTime = jsonObjectDataList.get(position).getLong("time");
+            String sTime = new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L));
+            holder.tvTime.setText(sTime);
             if (jsonObjectDataList.get(position).getInt("view") == 0) holder.ivView.setImageResource(R.drawable.ic_check);
             else holder.ivView.setImageResource(R.drawable.ic_double_check);
             if (send == jsonObjectDataList.get(position).getInt("send")) {
@@ -106,13 +112,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
     }
 
     public class Holder extends RecyclerView.ViewHolder {
-        private TextView tvChat;
+        private TextView tvChat, tvTime;
         private LinearLayout ll1, ll2;
         private ImageView ivView, iv3;
 
         public Holder(View itemView) {
             super(itemView);
             tvChat = itemView.findViewById(R.id.cChat);
+            tvTime = itemView.findViewById(R.id.cTime);
             ll1 = itemView.findViewById(R.id.cl1);
             ll2 = itemView.findViewById(R.id.cl2);
             ivView = itemView.findViewById(R.id.cView);

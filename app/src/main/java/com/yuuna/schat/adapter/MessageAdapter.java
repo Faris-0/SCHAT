@@ -19,7 +19,9 @@ import com.yuuna.schat.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -51,6 +53,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.Holder> 
                     .into(holder.civPhoto);
             else holder.civPhoto.setImageResource(R.drawable.photo);
             holder.tvName.setText(listMessage.get(position).getString("name"));
+            holder.tvContent.setText(listMessage.get(position).getString("last_message"));
+            Long lTime = jsonObjectDataList.get(position).getLong("last_time");
+            String sTime = new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L));
+            holder.tvTime.setText(sTime);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -105,13 +111,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.Holder> 
 
     public class Holder extends RecyclerView.ViewHolder {
         private CircleImageView civPhoto;
-        private TextView tvName, tvContent;
+        private TextView tvName, tvContent, tvTime;
 
         public Holder(View itemView) {
             super(itemView);
             civPhoto = itemView.findViewById(R.id.mPhoto);
             tvName = itemView.findViewById(R.id.mName);
             tvContent = itemView.findViewById(R.id.mContent);
+            tvTime = itemView.findViewById(R.id.mTime);
             itemView.findViewById(R.id.mButton).setOnClickListener(v -> {
                 if (clickListener != null) clickListener.onItemClick(listMessage.get(getBindingAdapterPosition()), v);
             });

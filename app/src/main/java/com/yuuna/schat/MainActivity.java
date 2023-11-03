@@ -689,7 +689,9 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                         .put("id", id)
                                         .put("name", jsonObject.getString("name"))
                                         .put("username", jsonObject.getString("name"))
-                                        .put("photo", jsonObject.getString("photo"));
+                                        .put("photo", jsonObject.getString("photo"))
+                                        .put("last_message", jsonObject.getString("last_message"))
+                                        .put("last_time", jsonObject.getLong("last_time"));
                                 jsonObjectArrayList4.add(object);
                                 // Set to Adapter from Data Account
                                 messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);

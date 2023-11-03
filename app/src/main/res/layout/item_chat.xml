@@ -27,6 +27,15 @@
                 android:textSize="@dimen/_11ssp"
                 android:textColor="@color/white" />
 
+            <TextView
+                android:id="@+id/cTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/_4sdp"
+                android:text="00:00"
+                android:textSize="@dimen/_11ssp"
+                android:textColor="@color/light_gray" />
+
             <ImageView
                 android:id="@+id/cView"
                 android:layout_width="@dimen/_16sdp"
