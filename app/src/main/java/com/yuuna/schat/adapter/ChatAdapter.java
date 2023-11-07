@@ -44,13 +44,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
     @Override
     public void onBindViewHolder(Holder holder, int position) {
         try {
-            holder.tvChat.setText(jsonObjectDataList.get(position).getString("chat"));
-            Long lTime = jsonObjectDataList.get(position).getLong("time");
+            holder.tvChat.setText(listChat.get(position).getString("chat"));
+            Long lTime = listChat.get(position).getLong("time");
             String sTime = new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L));
             holder.tvTime.setText(sTime);
-            if (jsonObjectDataList.get(position).getInt("view") == 0) holder.ivView.setImageResource(R.drawable.ic_check);
+            if (listChat.get(position).getInt("view") == 0) holder.ivView.setImageResource(R.drawable.ic_check);
             else holder.ivView.setImageResource(R.drawable.ic_double_check);
-            if (send == jsonObjectDataList.get(position).getInt("send")) {
+            if (send == listChat.get(position).getInt("send")) {
                 holder.ll1.setScaleX(1);
                 holder.ll2.setScaleX(1);
                 holder.ivView.setVisibility(View.VISIBLE);
@@ -82,7 +82,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
                     ArrayList<JSONObject> tempFilteredList = new ArrayList<>();
                     for (JSONObject jsonObject : jsonObjectDataList) {
                         try {
-                            if (jsonObject.getString("name").toLowerCase().contains(searchString)) tempFilteredList.add(jsonObject);
+                            if (jsonObject.getString("chat").toLowerCase().contains(searchString)) tempFilteredList.add(jsonObject);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -124,6 +124,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
             ll2 = itemView.findViewById(R.id.cl2);
             ivView = itemView.findViewById(R.id.cView);
             iv3 = itemView.findViewById(R.id.cl3);
+            ll1.setOnClickListener(v -> {
+                if (clickListener != null) clickListener.onItemClick(listChat.get(getBindingAdapterPosition()), v);
+            });
         }
     }
 }

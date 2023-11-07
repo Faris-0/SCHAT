@@ -314,6 +314,52 @@ if ($data['request'] == "send_chat") {
     }
 }
 
+// Edit View
+// {
+//     "request" : "edit_view",
+//     "data" : {
+//         "id" : "",
+//         "send" : ""
+//     }
+// }
+//
+if ($data['request'] == "edit_view") {
+    $id = $data['data']['id'];
+    $send = $data['data']['send'];
+    $query = mysqli_query($conn, "UPDATE `message_detail` SET `view` = '1' WHERE `id` = '$id' AND `send` = '$send'");
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => true);
+        echo json_encode($response);
+    }
+}
+
+// Delete Chat
+// {
+//     "request" : "delete_chat",
+//     "data" : {
+//         "id" : "",
+//         "send" : "",
+//         "time" : ""
+//     }
+// }
+//
+if ($data['request'] == "delete_chat") {
+    $id = $data['data']['id'];
+    $send = $data['data']['send'];
+    $time = $data['data']['time'];
+    $query = mysqli_query($conn, "DELETE FROM `message_detail` WHERE `id` = '$id' AND `send` = '$send' AND `time` = '$time'");
+    if (mysqli_affected_rows($conn)) {
+        $response = array("status" => true);
+        echo json_encode($response);
+    } else {
+        $response = array("status" => true);
+        echo json_encode($response);
+    }
+}
+
 // Edit Name
 // {
 //     "request" : "edit_name",

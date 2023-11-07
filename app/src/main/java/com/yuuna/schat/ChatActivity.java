@@ -4,11 +4,13 @@ import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.SharedPref.SCHAT;
 import static com.yuuna.schat.util.SharedPref.TAG_KEY;
+import static com.yuuna.schat.util.SharedPref.TAG_NAME;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -33,7 +35,7 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class ChatActivity extends Activity {
+public class ChatActivity extends Activity implements ChatAdapter.ItemClickListener {
     
     private RecyclerView rvChats;
 
@@ -72,9 +74,33 @@ public class ChatActivity extends Activity {
         refresh = () -> {
             loadProfile();
             loadChat();
+            setView();
             handler.postDelayed(refresh, 10000); // 1000 == 1sec
         };
         handler.post(refresh);
+    }
+
+    private void setView() {
+        Integer who;
+        if (send == 0) who = 1;
+        else who = 0;
+        String message_detail = "{\"request\":\"edit_view\",\"data\":{\"id\":\""+id+"\",\"send\":\""+who+"\"}}";
+        JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
+        try {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadPhoto() {
@@ -136,7 +162,7 @@ public class ChatActivity extends Activity {
                                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
                                 chatAdapter = new ChatAdapter(jsonObjectArrayList, context);
                                 rvChats.setAdapter(chatAdapter);
-//                                messageAdapter.setClickListener(ChatActivity.this);
+                                chatAdapter.setClickListener(ChatActivity.this);
 
                                 // Auto Scroll to Bottom
                                 if (!isBottom) if (jsonObjectArrayList.size() != 0) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
@@ -172,6 +198,7 @@ public class ChatActivity extends Activity {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 etChat.setText("");
+                                isBottom = false;
                                 loadChat();
                             }
                         } catch (JSONException e) {
@@ -242,5 +269,17 @@ public class ChatActivity extends Activity {
     protected void onStop() {
         super.onStop();
         handler.removeCallbacks(refresh);
+    }
+
+    @Override
+    public void onItemClick(JSONObject jsonObject, View view) {
+        try {
+            Integer id = view.getId();
+            if (id == R.id.cl1) {
+                Log.d("SASASA", String.valueOf(jsonObject.getLong("time")));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
