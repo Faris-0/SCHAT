@@ -9,20 +9,23 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_30sdp"
         android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/cl2"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="0.1"
             android:padding="@dimen/_5sdp"
             android:background="@drawable/bg_button_2"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/cChat"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.1"
                 android:text="Ini adalah pesan yang kita kirim"
                 android:textSize="@dimen/_11ssp"
                 android:textColor="@color/white" />

@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ChatActivity extends Activity implements ChatAdapter.ItemClickListener {
     
     private RecyclerView rvChats;
+    private LinearLayout llDown;
 
     private Context context;
     private Handler handler = new Handler();
@@ -58,12 +60,32 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
 
         context = ChatActivity.this;
 
+        llDown = findViewById(R.id.cDown);
+
         findViewById(R.id.cBack).setOnClickListener(v -> onBackPressed());
+        llDown.setOnClickListener(v -> {
+            if (jsonObjectArrayList.size() != 0) {
+                rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
+                llDown.setVisibility(View.GONE);
+            }
+        });
         findViewById(R.id.cSend).setOnClickListener(v -> sendChat());
 
         rvChats = findViewById(R.id.cChats);
 
         rvChats.setLayoutManager(new CustomLinearLayoutManager(context));
+        rvChats.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                switch (newState) {
+                    case RecyclerView.SCROLL_STATE_IDLE:
+                        if (!rvChats.canScrollVertically(1)) llDown.setVisibility(View.GONE);
+                        else llDown.setVisibility(View.VISIBLE);
+                        break;
+                }
+            }
+        });
 
         id = getIntent().getStringExtra("id");
         send = getIntent().getIntExtra("send", 0);

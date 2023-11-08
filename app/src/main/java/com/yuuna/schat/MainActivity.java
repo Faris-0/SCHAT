@@ -120,7 +120,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
             @Override
             public void afterTextChanged(Editable editable) {
-                messageAdapter.getFilter().filter(editable);
+                if (messageAdapter != null) messageAdapter.getFilter().filter(editable);
                 if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
                 else llClear.setVisibility(View.VISIBLE);
             }

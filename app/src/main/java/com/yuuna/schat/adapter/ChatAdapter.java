@@ -124,9 +124,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
             ll2 = itemView.findViewById(R.id.cl2);
             ivView = itemView.findViewById(R.id.cView);
             iv3 = itemView.findViewById(R.id.cl3);
-            ll1.setOnClickListener(v -> {
+            ll1.setOnLongClickListener(v -> {
                 if (clickListener != null) clickListener.onItemClick(listChat.get(getBindingAdapterPosition()), v);
+                return false;
             });
+//            ll1.setOnClickListener(v -> {
+//                if (clickListener != null) clickListener.onItemClick(listChat.get(getBindingAdapterPosition()), v);
+//            });
         }
     }
 }
