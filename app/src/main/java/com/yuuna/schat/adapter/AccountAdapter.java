@@ -2,8 +2,8 @@ package com.yuuna.schat.adapter;
 
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
-import static com.yuuna.schat.util.SharedPref.TAG_KEY;
-import static com.yuuna.schat.util.SharedPref.SCHAT;
+import static com.yuuna.schat.util.AppConstants.TAG_KEY;
+import static com.yuuna.schat.util.AppConstants.SCHAT;
 
 import android.app.Activity;
 import android.content.Context;

@@ -1,10 +1,9 @@
-package com.yuuna.schat;
+package com.yuuna.schat.ui;
 
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
-import static com.yuuna.schat.util.SharedPref.SCHAT;
-import static com.yuuna.schat.util.SharedPref.TAG_KEY;
-import static com.yuuna.schat.util.SharedPref.TAG_NAME;
+import static com.yuuna.schat.util.AppConstants.SCHAT;
+import static com.yuuna.schat.util.AppConstants.TAG_KEY;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.yuuna.schat.R;
 import com.yuuna.schat.adapter.ChatAdapter;
 import com.yuuna.schat.util.Client;
 import com.yuuna.schat.util.CustomLinearLayoutManager;

@@ -14,7 +14,7 @@
         android:theme="@style/NoActionBar"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,8 +23,8 @@
             </intent-filter>
         </activity>
         <service android:name=".util.schatService" />
-        <activity android:name=".SettingActivity" />
-        <activity android:name=".ChatActivity" />
+        <activity android:name=".ui.SettingActivity" />
+        <activity android:name=".ui.ChatActivity" />
     </application>
 
 </manifest>

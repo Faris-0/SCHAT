@@ -1,8 +1,8 @@
 package com.yuuna.schat.util;
 
 import static com.yuuna.schat.util.Client.BASE_URL;
-import static com.yuuna.schat.util.SharedPref.SCHAT;
-import static com.yuuna.schat.util.SharedPref.TAG_KEY;
+import static com.yuuna.schat.util.AppConstants.SCHAT;
+import static com.yuuna.schat.util.AppConstants.TAG_KEY;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

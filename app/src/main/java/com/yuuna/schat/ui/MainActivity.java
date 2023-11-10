@@ -1,13 +1,13 @@
-package com.yuuna.schat;
+package com.yuuna.schat.ui;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
-import static com.yuuna.schat.util.SharedPref.TAG_ACC;
-import static com.yuuna.schat.util.SharedPref.TAG_KEY;
-import static com.yuuna.schat.util.SharedPref.TAG_NAME;
-import static com.yuuna.schat.util.SharedPref.SCHAT;
-import static com.yuuna.schat.util.SharedPref.TAG_SIGN;
+import static com.yuuna.schat.util.AppConstants.TAG_ACC;
+import static com.yuuna.schat.util.AppConstants.TAG_KEY;
+import static com.yuuna.schat.util.AppConstants.TAG_NAME;
+import static com.yuuna.schat.util.AppConstants.SCHAT;
+import static com.yuuna.schat.util.AppConstants.TAG_SIGN;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -36,6 +36,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.yuuna.schat.R;
 import com.yuuna.schat.adapter.AccountAdapter;
 import com.yuuna.schat.adapter.ContactAdapter;
 import com.yuuna.schat.adapter.MessageAdapter;
@@ -129,7 +130,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         llClear.setOnClickListener(v1 -> {
             etFind.setText("");
             llClear.setVisibility(View.GONE);
-            messageAdapter.getFilter().filter("");
+            if (messageAdapter != null) messageAdapter.getFilter().filter("");
         });
     }
 
@@ -163,7 +164,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
             @Override
             public void afterTextChanged(Editable editable) {
-                contactAdapter.getFilter().filter(editable);
+                if (contactAdapter != null) contactAdapter.getFilter().filter(editable);
                 if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
                 else llClear.setVisibility(View.VISIBLE);
             }
@@ -172,7 +173,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         llClear.setOnClickListener(v1 -> {
             etName.setText("");
             llClear.setVisibility(View.GONE);
-            contactAdapter.getFilter().filter("");
+            if (contactAdapter != null) contactAdapter.getFilter().filter("");
         });
 
         dContact.findViewById(R.id.cAdd).setOnClickListener(v -> addContactDialog());

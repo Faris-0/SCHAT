@@ -1,9 +1,8 @@
 package com.yuuna.schat.adapter;
 
-import static com.yuuna.schat.ChatActivity.send;
+import static com.yuuna.schat.ui.ChatActivity.send;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
