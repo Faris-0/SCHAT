@@ -165,24 +165,18 @@ if ($data['request'] == "add_message") {
         $id1 = md5(md5($key."+".$object->key, true));
         $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id`='$id1'");
         if (mysqli_affected_rows($conn)) {
-            $response = array("status" => false);
+            $response = array("status" => true, "id" => $id1);
             echo json_encode($response);
         } else {
             $id2 = md5(md5($object->key."+".$key, true));
             $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id`='$id2'");
             if (mysqli_affected_rows($conn)) {
-                $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1' WHERE `key` = '$key'");
-                if (mysqli_affected_rows($conn)) {
-                    $response = array("status" => true);
-                    echo json_encode($response);
-                } else {
-                    $response = array("status" => false);
-                    echo json_encode($response);
-                }
+                $response = array("status" => true, "id" => $id2);
+                echo json_encode($response);
             } else {
-                $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`, `send`) VALUES ('$key', '$id1', '1', '0'), ('$object->key', '$id1', '0', '1')");
+                $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`, `send`) VALUES ('$key', '$id1', '0', '0'), ('$object->key', '$id1', '0', '1')");
                 if (mysqli_affected_rows($conn)) {
-                    $response = array("status" => true);
+                    $response = array("status" => true, "id" => $id1);
                     echo json_encode($response);
                 } else {
                     $response = array("status" => false);
@@ -235,6 +229,10 @@ if ($data['request'] == "message_detail") {
         while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private, "last_send" => end($rows)['send'], "last_chat" => end($rows)['chat'], "last_time" => end($rows)['time'], "last_view" => end($rows)['view']);
+            echo json_encode($response);
+        } else {
+            // Tambahan
+            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private);
             echo json_encode($response);
         }
     }

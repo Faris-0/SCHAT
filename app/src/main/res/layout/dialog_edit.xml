@@ -21,7 +21,7 @@
             android:orientation="horizontal">
 
             <LinearLayout
-                android:id="@+id/ebBack"
+                android:id="@+id/eBack"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:background="@drawable/bg_button_3"
@@ -36,18 +36,19 @@
             </LinearLayout>
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/eTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.9"
                 android:layout_marginHorizontal="@dimen/_12sdp"
-                android:text="Edit Bio"
+                android:text="Edit Name / Bio"
                 android:textSize="@dimen/_15ssp"
                 android:textColor="@color/gray"
                 android:textStyle="bold"
                 android:layout_gravity="center"/>
 
             <LinearLayout
-                android:id="@+id/ebSave"
+                android:id="@+id/eSave"
                 android:layout_width="@dimen/_25sdp"
                 android:layout_height="@dimen/_25sdp"
                 android:background="@drawable/bg_button_3"
@@ -67,26 +68,26 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/ebBio"
+                android:id="@+id/eText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.9"
                 android:padding="@dimen/_5sdp"
-                android:hint="Bio"
+                android:hint="Name / Bio"
                 android:textColorHint="@color/light_gray"
                 android:textSize="@dimen/_12ssp"
                 android:textColor="@color/gray"
-                android:maxLength="70"
+                android:maxLength="25"
                 android:gravity="top"
                 android:background="@android:color/transparent" />
 
             <TextView
-                android:id="@+id/ebLimit"
+                android:id="@+id/eLimit"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:paddingHorizontal="@dimen/_4sdp"
                 android:paddingVertical="@dimen/_5sdp"
-                android:text="70"
+                android:text="25"
                 android:textSize="@dimen/_12ssp"
                 android:textColor="@color/gray" />
         </LinearLayout>

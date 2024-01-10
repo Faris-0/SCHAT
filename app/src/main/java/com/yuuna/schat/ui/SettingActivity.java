@@ -57,13 +57,13 @@ public class SettingActivity extends Activity {
     private Switch sHide;
 
     private Context context;
-    private Dialog dName, dBio;
+    private Dialog dEdit;
     private SharedPreferences spSCHAT;
 
     private ArrayList<JSONObject> jsonObjectArrayList;
 
     private String setKey, setName, bio, dataAcc;
-    private Integer TAG_GALLERY = 2;
+    private Integer TAG_GALLERY = 2, limitText = 0;;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +95,8 @@ public class SettingActivity extends Activity {
                 }
             } else ActivityCompat.requestPermissions( this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, TAG_GALLERY);
         });
-        findViewById(R.id.sBName).setOnClickListener(v -> nameDialog());
-        findViewById(R.id.sBBio).setOnClickListener(v -> bioDialog());
+        findViewById(R.id.sBName).setOnClickListener(v -> editDialog("Name"));
+        findViewById(R.id.sBBio).setOnClickListener(v -> editDialog("Bio"));
         sHide.setOnCheckedChangeListener((compoundButton, b) -> setPrivate(b));
         findViewById(R.id.sBSignOut).setOnClickListener(v -> {
             try {
@@ -164,19 +164,31 @@ public class SettingActivity extends Activity {
         }
     }
 
-    private void nameDialog() {
-        dName = new Dialog(context);
-        dName.setContentView(R.layout.dialog_edit_name);
-        dName.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        dName.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    private void editDialog(String edit) {
+        dEdit = new Dialog(context);
+        dEdit.setContentView(R.layout.dialog_edit);
+        dEdit.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dEdit.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-        EditText etName = dName.findViewById(R.id.enName);
-        TextView tvLimit = dName.findViewById(R.id.enLimit);
+        EditText etText = dEdit.findViewById(R.id.eText);
+        TextView tvLimit = dEdit.findViewById(R.id.eLimit);
+        TextView tvTitle = dEdit.findViewById(R.id.eTitle);
 
-        etName.setText(setName);
-        tvLimit.setText(String.valueOf(25 - setName.length()));
+        if (edit.equals("Name")) {
+            limitText = 25;
+            etText.setText(setName);
+            etText.setHint("Name");
+            tvLimit.setText(String.valueOf(limitText - setName.length()));
+            tvTitle.setText("Edit Name");
+        } else if (edit.equals("Bio")) {
+            limitText = 70;
+            etText.setText(bio);
+            etText.setHint("Bio");
+            tvLimit.setText(String.valueOf(limitText - bio.length()));
+            tvTitle.setText("Edit Bio");
+        }
 
-        etName.addTextChangedListener(new TextWatcher() {
+        etText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -189,47 +201,18 @@ public class SettingActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                tvLimit.setText(String.valueOf(25 - editable.length()));
+                tvLimit.setText(String.valueOf(limitText - editable.length()));
             }
         });
 
-        dName.findViewById(R.id.enSave).setOnClickListener(v -> saveAccount(etName.getText().toString(), true));
+        dEdit.findViewById(R.id.eBack).setOnClickListener(v -> dEdit.dismiss());
 
-        dName.show();
-    }
-
-    private void bioDialog() {
-        dBio = new Dialog(context);
-        dBio.setContentView(R.layout.dialog_edit_bio);
-        dBio.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        dBio.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-        EditText etBio = dBio.findViewById(R.id.ebBio);
-        TextView tvLimit = dBio.findViewById(R.id.ebLimit);
-
-        etBio.setText(bio);
-        tvLimit.setText(String.valueOf(70 - bio.length()));
-
-        etBio.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                tvLimit.setText(String.valueOf(70 - editable.length()));
-            }
+        dEdit.findViewById(R.id.eSave).setOnClickListener(v -> {
+            if (edit.equals("Name")) saveAccount(etText.getText().toString(), true);
+            else if (edit.equals("Bio")) saveAccount(etText.getText().toString(), false);
         });
 
-        dBio.findViewById(R.id.ebSave).setOnClickListener(v -> saveAccount(etBio.getText().toString(), false));
-
-        dBio.show();
+        dEdit.show();
     }
 
     private void saveAccount(String nb, boolean b) {
@@ -274,14 +257,13 @@ public class SettingActivity extends Activity {
                                         }
                                     });
                                     spSCHAT.edit().putString(TAG_NAME, nb).putString(TAG_ACC, String.valueOf(jsonObjectArrayList)).commit();
-                                    dName.dismiss();
                                 } else {
                                     if (!nb.equals("")) {
                                         bio = nb;
                                         tvABio.setText(nb);
                                     } else tvABio.setText("Empty");
-                                    dBio.dismiss();
                                 }
+                                dEdit.dismiss();
                                 Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
@@ -343,8 +325,8 @@ public class SettingActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == TAG_GALLERY){
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == TAG_GALLERY) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Open Galley
                 try {
                     startActivityForResult(new Intent(Intent.ACTION_PICK).setType("image/*"), TAG_GALLERY);

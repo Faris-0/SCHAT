@@ -8,6 +8,7 @@ import static com.yuuna.schat.util.AppConstants.TAG_KEY;
 import static com.yuuna.schat.util.AppConstants.TAG_NAME;
 import static com.yuuna.schat.util.AppConstants.SCHAT;
 import static com.yuuna.schat.util.AppConstants.TAG_SIGN;
+import static com.yuuna.schat.util.schatService.isLastOnline;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -21,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -79,6 +81,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             ActivityCompat.requestPermissions(this, new String[]{POST_NOTIFICATIONS}, 1);
         }
         // Running Service
+        isLastOnline = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(new Intent(this, schatService.class));
         } else {
@@ -106,7 +109,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             //
             etFind.setText("");
             llClear.setVisibility(View.GONE);
-            messageAdapter.getFilter().filter("");
+            if (messageAdapter != null) messageAdapter.getFilter().filter("");
         });
         etFind.addTextChangedListener(new TextWatcher() {
             @Override
@@ -127,7 +130,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             }
         });
 
-        llClear.setOnClickListener(v1 -> {
+        llClear.setOnClickListener(v -> {
             etFind.setText("");
             llClear.setVisibility(View.GONE);
             if (messageAdapter != null) messageAdapter.getFilter().filter("");
@@ -170,7 +173,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             }
         });
 
-        llClear.setOnClickListener(v1 -> {
+        llClear.setOnClickListener(v -> {
             etName.setText("");
             llClear.setVisibility(View.GONE);
             if (contactAdapter != null) contactAdapter.getFilter().filter("");
@@ -411,7 +414,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void logreg(String name, String username, String password, Boolean isLogReg) {
-        String LogReg = "";
+        String LogReg;
         if (isLogReg) {
             LogReg = "{\"request\":\"login\",\"data\":{\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
         } else {
@@ -589,9 +592,10 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                     runOnUiThread(() -> {
                         // Response
                         try {
-                            if (new JSONObject(response).getBoolean("status")) {
-                                // Load Message
-                                loadMessage();
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject.getBoolean("status")) {
+                                // Open Chat
+                                loadSend(jsonObject.getString("id"), true);
                                 dContact.dismiss();
                             }
                         } catch (JSONException e) {

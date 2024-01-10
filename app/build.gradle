@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.yuuna.schat'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.yuuna.schat"
         minSdk 21
-        targetSdk 33
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }
