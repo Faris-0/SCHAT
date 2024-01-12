@@ -396,18 +396,14 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             Boolean isEmpty = false;
             if (llName.getVisibility() == View.GONE) {
                 // Login
-                if (!username.isEmpty() && !password.isEmpty()) {
-                    logreg(name, username, password, true);
-                } else isEmpty = true;
+                if (!username.isEmpty() && !password.isEmpty()) logreg(name, username, password, true);
+                else isEmpty = true;
             } else {
                 // Register
-                if (!name.isEmpty() && !username.isEmpty() && !password.isEmpty()) {
-                    logreg(name, username, password, false);
-                } else isEmpty = true;
+                if (!name.isEmpty() && !username.isEmpty() && !password.isEmpty()) logreg(name, username, password, false);
+                else isEmpty = true;
             }
-            if (isEmpty) {
-                Toast.makeText(context, "Data cannot be empty!", Toast.LENGTH_SHORT).show();
-            }
+            if (isEmpty) Toast.makeText(context, "Data cannot be empty!", Toast.LENGTH_SHORT).show();
         });
 
         dSign.show();
@@ -415,11 +411,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
     private void logreg(String name, String username, String password, Boolean isLogReg) {
         String LogReg;
-        if (isLogReg) {
-            LogReg = "{\"request\":\"login\",\"data\":{\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
-        } else {
-            LogReg = "{\"request\":\"register\",\"data\":{\"name\":\""+name+"\",\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
-        }
+        if (isLogReg) LogReg = "{\"request\":\"login\",\"data\":{\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
+        else LogReg = "{\"request\":\"register\",\"data\":{\"name\":\""+name+"\",\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(LogReg).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
@@ -503,7 +496,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
-                                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                JSONArray jsonArray = jsonObject.getJSONArray("contacts");
                                 jsonObjectArrayList2 = new ArrayList<>();
                                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList2.add(jsonArray.getJSONObject(i));
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
@@ -541,14 +534,14 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 loadMessage();
                 dMenu.dismiss();
             } else if (id == R.id.mButton) {
-                loadSend(jsonObject.getString("id"), true);
+                loadSend(jsonObject.getString("id"));
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadSend(String id, Boolean isStartActivity) {
+    private void loadSend(String id) {
         String sender = "{\"request\":\"sender\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(sender).getAsJsonObject();
         try {
@@ -561,10 +554,10 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 Integer send = jsonObject.getInt("send");
-                                if (isStartActivity) startActivity(new Intent(context, ChatActivity.class)
+                                startActivity(new Intent(context, ChatActivity.class)
                                         .putExtra("id", id)
                                         .putExtra("send", send)
-                                ); else loadMessageDetail(id, send);
+                                );
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -595,7 +588,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 // Open Chat
-                                loadSend(jsonObject.getString("id"), true);
+                                loadSend(jsonObject.getString("id"));
                                 dContact.dismiss();
                             }
                         } catch (JSONException e) {
@@ -637,6 +630,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void loadMessage() {
+        Log.d("KEEE", setKey);
         String message = "{\"request\":\"message\",\"data\":{\"key\":\""+setKey+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
         try {
@@ -648,7 +642,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
-                                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                JSONArray jsonArray = jsonObject.getJSONArray("messages");
                                 jsonObjectArrayList3 = new ArrayList<>();
                                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList3.add(jsonArray.getJSONObject(i));
                                 jsonObjectArrayList4 = new ArrayList<>();
@@ -659,8 +653,9 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                     messageAdapter.setClickListener(MainActivity.this);
                                 } else {
                                     for (int i = 0; i < jsonObjectArrayList3.size(); i++) {
-                                        loadSend(jsonObjectArrayList3.get(i).getString("id"), false);
-//                                        loadMessageDetail(jsonObjectArrayList3.get(i).getString("id"));
+                                        String id = jsonObjectArrayList3.get(i).getString("id");
+                                        Integer send = jsonObjectArrayList3.get(i).getInt("send");
+                                        loadMessageDetail(id, send);
                                     }
                                 }
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();

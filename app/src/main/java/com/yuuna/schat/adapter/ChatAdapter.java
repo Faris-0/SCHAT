@@ -2,7 +2,6 @@ package com.yuuna.schat.adapter;
 
 import static com.yuuna.schat.ui.ChatActivity.send;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,12 +25,10 @@ import java.util.Date;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implements Filterable {
 
     private ArrayList<JSONObject> jsonObjectDataList, listChat;
-    private Context mContext;
     private ItemClickListener clickListener;
 
-    public ChatAdapter(ArrayList<JSONObject> jsonObjectArrayList, Context context) {
+    public ChatAdapter(ArrayList<JSONObject> jsonObjectArrayList) {
         this.jsonObjectDataList = jsonObjectArrayList;
-        this.mContext = context;
         this.listChat = jsonObjectArrayList;
     }
 

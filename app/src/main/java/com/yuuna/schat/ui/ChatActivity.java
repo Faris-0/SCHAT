@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -103,10 +102,7 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
     }
 
     private void setView() {
-        Integer who;
-        if (send == 0) who = 1;
-        else who = 0;
-        String message_detail = "{\"request\":\"edit_view\",\"data\":{\"id\":\""+id+"\",\"send\":\""+who+"\"}}";
+        String message_detail = "{\"request\":\"edit_view\",\"data\":{\"id\":\""+id+"\",\"send\":\""+send+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
@@ -178,18 +174,18 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
-                                JSONArray jsonArray = jsonObject.getJSONArray("data");
+                                JSONArray jsonArray = jsonObject.getJSONArray("chats");
                                 rvChats.getLayoutManager().onRestoreInstanceState(rvChats.getLayoutManager().onSaveInstanceState());
                                 jsonObjectArrayList = new ArrayList<>();
                                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
-                                chatAdapter = new ChatAdapter(jsonObjectArrayList, context);
+                                chatAdapter = new ChatAdapter(jsonObjectArrayList);
                                 rvChats.setAdapter(chatAdapter);
                                 chatAdapter.setClickListener(ChatActivity.this);
 
                                 // Auto Scroll to Bottom
                                 if (!isBottom) if (jsonObjectArrayList.size() != 0) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
                                 isBottom = true;
-                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -204,11 +200,14 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // If you have a new chat, a scroll down will appear
+        if (!rvChats.canScrollVertically(1)) llDown.setVisibility(View.GONE);
+        else llDown.setVisibility(View.VISIBLE);
     }
 
     private void sendChat() {
         EditText etChat = findViewById(R.id.cInputChat);
-        String send_chat = "{\"request\":\"send_chat\",\"data\":{\"id\":\""+id+"\",\"chat\":\""+etChat.getText().toString()+"\",\"send\":\""+send+"\",\"time\":\""+(System.currentTimeMillis()/1000)+"\"}}";
+        String send_chat = "{\"request\":\"send_chat\",\"data\":{\"id\":\""+id+"\",\"chat\":\""+etChat.getText().toString()+"\",\"send\":\""+send+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(send_chat).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {

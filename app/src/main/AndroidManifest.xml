@@ -24,6 +24,7 @@
             </intent-filter>
         </activity>
         <service android:name=".util.schatService" android:foregroundServiceType="dataSync" />
+        <receiver android:name=".util.schatBroadcastReceiver" />
         <activity android:name=".ui.SettingActivity" />
         <activity android:name=".ui.ChatActivity" />
     </application>
