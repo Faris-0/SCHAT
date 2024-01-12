@@ -30,13 +30,14 @@ if ($data['request'] == "register") {
     $name = $data['data']['name'];
     $username = $data['data']['username'];
     $password = md5(md5($data['data']['password'], true));
-    $key = md5(md5($username."+".$password."+".time(), true));
+    $time = time();
+    $key = md5(md5($username."+".$password."+".$time, true));
     $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => false, "message" => "Username has been taken!");
         echo json_encode($response);
     } else {
-        $query = mysqli_query($conn, "INSERT INTO `user` (`key`, `name`, `username`, `password`) VALUES ('$key', '$name', '$username', '$password')");
+        $query = mysqli_query($conn, "INSERT INTO `user` (`key`, `name`, `username`, `password`, `date_created`) VALUES ('$key', '$name', '$username', '$password', '$time')");
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => true, "key" => $key, "name" => $name, "message" => "Register Success!");
             echo json_encode($response);
@@ -139,10 +140,10 @@ if ($data['request'] == "contact") {
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "data" => $rows);
+        $response = array("status" => true, "contacts" => $rows);
         echo json_encode($response);
     } else {
-        $response = array("status" => true, "data" => $rows);
+        $response = array("status" => true, "contacts" => $rows);
         echo json_encode($response);
     }
 }
@@ -197,14 +198,14 @@ if ($data['request'] == "add_message") {
 //
 if ($data['request'] == "message") {
     $key = $data['data']['key'];
-    $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
+    $query = mysqli_query($conn, "SELECT `message`.`id`, `message`.`send` FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "data" => $rows);
+        $response = array("status" => true, "messages" => $rows);
         echo json_encode($response);
     } else {
-        $response = array("status" => true, "data" => $rows);
+        $response = array("status" => true, "messages" => $rows);
         echo json_encode($response);
     }
 }
@@ -255,6 +256,9 @@ if ($data['request'] == "sender") {
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "send" => $object->send);
         echo json_encode($response);
+    } else {
+        $response = array("status" => true, "send" => "");
+        echo json_encode($response);
     }
 }
 
@@ -272,10 +276,10 @@ if ($data['request'] == "chats") {
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
-        $response = array("status" => true, "data" => $rows);
+        $response = array("status" => true, "chats" => $rows);
         echo json_encode($response);
     } else {
-        $response = array("status" => true, "data" => $rows);
+        $response = array("status" => true, "chats" => $rows);
         echo json_encode($response);
     }
 }
@@ -286,8 +290,7 @@ if ($data['request'] == "chats") {
 //     "data" : {
 //         "id" : "",
 //         "chat" : "",
-//         "send" : "",
-//         "time" : ""
+//         "send" : ""
 //     }
 // }
 //
@@ -295,7 +298,7 @@ if ($data['request'] == "send_chat") {
     $id = $data['data']['id'];
     $chat = $data['data']['chat'];
     $send = $data['data']['send'];
-    $time = $data['data']['time'];
+    $time = time();
     $query = mysqli_query($conn, "INSERT INTO `message_detail` (`id`, `chat`, `send`, `time`) VALUES ('$id', '$chat', '$send', '$time')");
     if (mysqli_affected_rows($conn)) {
         $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1' WHERE `id` = '$id'");
@@ -324,7 +327,7 @@ if ($data['request'] == "send_chat") {
 if ($data['request'] == "edit_view") {
     $id = $data['data']['id'];
     $send = $data['data']['send'];
-    $query = mysqli_query($conn, "UPDATE `message_detail` SET `view` = '1' WHERE `id` = '$id' AND `send` = '$send'");
+    $query = mysqli_query($conn, "UPDATE `message_detail` SET `view` = '1' WHERE `id` = '$id' AND `send` != '$send'");
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true);
         echo json_encode($response);
@@ -355,6 +358,35 @@ if ($data['request'] == "delete_chat") {
     } else {
         $response = array("status" => true);
         echo json_encode($response);
+    }
+}
+
+// Check Chat
+// {
+//     "request" : "check_chat",
+//     "data" : {
+//         "id" : "",
+//         "send" : ""
+//     }
+// }
+//
+if ($data['request'] == "check_chat") {
+    $id = $data['data']['id'];
+    $send = $data['data']['send'];
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`photo`, `user`.`date_created` FROM `message`, `user` WHERE `message`.`key`=`user`.`key` AND `message`.`id`='$id'");
+    $object = mysqli_fetch_object($query);
+    if (mysqli_affected_rows($conn)) {
+        $query = mysqli_query($conn, "SELECT `message_detail`.`chat`, `message_detail`.`time` FROM `message_detail` WHERE `message_detail`.`id`='$id' AND `message_detail`.`view`='0' AND `message_detail`.`send`!='$send'");
+        $rows = array();
+        while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
+        if (mysqli_affected_rows($conn)) {
+            $response = array("status" => true, "name" => $object->name, "photo" => $object->photo, "date_created" => $object->date_created, "messages" => $rows);
+            echo json_encode($response);
+        } else {
+            // Tambahan
+            $response = array("status" => true, "name" => $object->name, "photo" => $object->photo, "date_created" => $object->date_created, "messages" => $rows);
+            echo json_encode($response);
+        }
     }
 }
 
