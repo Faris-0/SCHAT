@@ -20,6 +20,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -52,6 +53,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -62,6 +64,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     private RecyclerView rvMessage;
 
     private Context context;
+    private Handler handler = new Handler();
+    private Runnable refresh;
     private Dialog dMenu, dSign, dContact, dAddContact;
     private SharedPreferences spSCHAT;
 
@@ -69,7 +73,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
     private ArrayList<JSONObject> jsonObjectArrayList, jsonObjectArrayList2, jsonObjectArrayList3, jsonObjectArrayList4;
 
-    private String dataAcc, setKey, setName;
+    private String dataAcc, setKey, setName, setFilter;
     private Boolean isAccount, isSign;
 
     @Override
@@ -103,14 +107,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             llToolbar.setVisibility(View.GONE);
             findViewById(R.id.mfLayout).setVisibility(View.VISIBLE);
         });
-        findViewById(R.id.mfBack).setOnClickListener(v -> {
-            llToolbar.setVisibility(View.VISIBLE);
-            llFind.setVisibility(View.GONE);
-            //
-            etFind.setText("");
-            llClear.setVisibility(View.GONE);
-            if (messageAdapter != null) messageAdapter.getFilter().filter("");
-        });
+        findViewById(R.id.mfBack).setOnClickListener(v -> closeSearch());
         etFind.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -124,17 +121,27 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (messageAdapter != null) messageAdapter.getFilter().filter(editable);
+                setFilter = String.valueOf(editable);
+                if (messageAdapter != null) messageAdapter.getFilter().filter(setFilter);
                 if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
                 else llClear.setVisibility(View.VISIBLE);
             }
         });
 
-        llClear.setOnClickListener(v -> {
-            etFind.setText("");
-            llClear.setVisibility(View.GONE);
-            if (messageAdapter != null) messageAdapter.getFilter().filter("");
-        });
+        llClear.setOnClickListener(v -> clearSearch());
+    }
+
+    private void closeSearch() {
+        llToolbar.setVisibility(View.VISIBLE);
+        llFind.setVisibility(View.GONE);
+        // Clear SearchBar
+        clearSearch();
+    }
+
+    private void clearSearch() {
+        etFind.setText("");
+        llClear.setVisibility(View.GONE);
+        if (messageAdapter != null) messageAdapter.getFilter().filter("");
     }
 
     private void contactDialog() {
@@ -534,6 +541,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 loadMessage();
                 dMenu.dismiss();
             } else if (id == R.id.mButton) {
+                if (setFilter != null) closeSearch();
                 loadSend(jsonObject.getString("id"));
             }
         } catch (JSONException e) {
@@ -620,17 +628,21 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         if (!isSign) sign();
         loadAcc();
         if (!setKey.equals("")) loadContact();
-        loadMessage();
+        refresh = () -> {
+            loadMessage();
+            handler.postDelayed(refresh, 10000); // 1000 == 1sec
+        };
+        handler.post(refresh);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         if (dSign != null) dSign.dismiss();
+        handler.removeCallbacks(refresh);
     }
 
     private void loadMessage() {
-        Log.d("KEEE", setKey);
         String message = "{\"request\":\"message\",\"data\":{\"key\":\""+setKey+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
         try {
@@ -655,7 +667,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                     for (int i = 0; i < jsonObjectArrayList3.size(); i++) {
                                         String id = jsonObjectArrayList3.get(i).getString("id");
                                         Integer send = jsonObjectArrayList3.get(i).getInt("send");
-                                        loadMessageDetail(id, send);
+                                        Integer time = jsonObjectArrayList3.get(i).getInt("time");
+                                        loadMessageDetail(id, send, time);
                                     }
                                 }
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
@@ -675,7 +688,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         }
     }
 
-    private void loadMessageDetail(String id, Integer send) {
+    private void loadMessageDetail(String id, Integer send, Integer time) {
         String message_detail = "{\"request\":\"message_detail\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
         try {
@@ -689,7 +702,8 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                             if (jsonObject.getBoolean("status")) {
                                 String who;
                                 if (send != jsonObject.getInt("last_send")) who = "YOU";
-                                else who = "ME";
+                                else if (send == jsonObject.getInt("last_send")) who = "ME";
+                                else who = "";
                                 JSONObject object = new JSONObject()
                                         .put("id", id)
                                         .put("name", jsonObject.getString("name"))
@@ -697,13 +711,23 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                         .put("photo", jsonObject.getString("photo"))
                                         .put("last_send", who)
                                         .put("last_chat", jsonObject.getString("last_chat"))
-                                        .put("last_time", jsonObject.getLong("last_time"))
+                                        .put("last_time", time)
                                         .put("last_view", jsonObject.getInt("last_view"));
                                 jsonObjectArrayList4.add(object);
+                                // Sort by last_time
+                                Collections.sort(jsonObjectArrayList4, (a, b) -> {
+                                    try {
+                                        return b.getInt("last_time") - a.getInt("last_time");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        return 0;
+                                    }
+                                });
                                 // Set to Adapter from Data Account
                                 messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
                                 rvMessage.setAdapter(messageAdapter);
                                 messageAdapter.setClickListener(MainActivity.this);
+                                if (messageAdapter != null && setFilter != null) messageAdapter.getFilter().filter(setFilter);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

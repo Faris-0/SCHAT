@@ -41,8 +41,9 @@ CREATE TABLE `contact` (
 CREATE TABLE `message` (
   `key` varchar(255) NOT NULL,
   `id` varchar(255) NOT NULL,
-  `open` int(1) NOT NULL.
-  `send` int(1) NOT NULL
+  `open` int(1) NOT NULL,
+  `send` int(1) NOT NULL,
+  `time` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

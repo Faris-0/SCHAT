@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:id="@+id/cl1"
     android:gravity="end"
+    android:background="@color/light_gray_3"
     android:layout_margin="@dimen/_4sdp">
 
     <LinearLayout

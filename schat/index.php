@@ -198,7 +198,7 @@ if ($data['request'] == "add_message") {
 //
 if ($data['request'] == "message") {
     $key = $data['data']['key'];
-    $query = mysqli_query($conn, "SELECT `message`.`id`, `message`.`send` FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
+    $query = mysqli_query($conn, "SELECT `message`.`id`, `message`.`send`, `message`.`time` FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
@@ -229,11 +229,10 @@ if ($data['request'] == "message_detail") {
         $rows = array();
         while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
         if (mysqli_affected_rows($conn)) {
-            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private, "last_send" => end($rows)['send'], "last_chat" => end($rows)['chat'], "last_time" => end($rows)['time'], "last_view" => end($rows)['view']);
+            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private, "last_send" => end($rows)['send'], "last_chat" => end($rows)['chat'], "last_view" => end($rows)['view']);
             echo json_encode($response);
         } else {
-            // Tambahan
-            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private);
+            $response = array("status" => true, "name" => $object->name, "username" => $object->username, "photo" => $object->photo, "last_online" => $object->last_online, "private" => $object->private, "last_send" => 2, "last_chat" => "", "last_view" => 0);
             echo json_encode($response);
         }
     }
@@ -301,7 +300,7 @@ if ($data['request'] == "send_chat") {
     $time = time();
     $query = mysqli_query($conn, "INSERT INTO `message_detail` (`id`, `chat`, `send`, `time`) VALUES ('$id', '$chat', '$send', '$time')");
     if (mysqli_affected_rows($conn)) {
-        $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1' WHERE `id` = '$id'");
+        $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1', `time` = '$time' WHERE `id` = '$id'");
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => true);
             echo json_encode($response);
