@@ -124,9 +124,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
                 if (clickListener != null) clickListener.onItemClick(listChat.get(getBindingAdapterPosition()), v);
                 return false;
             });
-//            ll1.setOnClickListener(v -> {
-//                if (clickListener != null) clickListener.onItemClick(listChat.get(getBindingAdapterPosition()), v);
-//            });
         }
     }
 }
