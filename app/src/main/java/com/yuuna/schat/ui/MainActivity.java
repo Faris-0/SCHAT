@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -668,7 +667,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                         String id = jsonObjectArrayList3.get(i).getString("id");
                                         Integer send = jsonObjectArrayList3.get(i).getInt("send");
                                         Integer time = jsonObjectArrayList3.get(i).getInt("time");
-                                        loadMessageDetail(id, send, time);
+                                        loadMessageDetail(id, send, time, jsonObjectArrayList3.size());
                                     }
                                 }
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
@@ -688,7 +687,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         }
     }
 
-    private void loadMessageDetail(String id, Integer send, Integer time) {
+    private void loadMessageDetail(String id, Integer send, Integer time, Integer size) {
         String message_detail = "{\"request\":\"message_detail\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
         try {
@@ -723,11 +722,13 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                         return 0;
                                     }
                                 });
-                                // Set to Adapter from Data Account
-                                messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
-                                rvMessage.setAdapter(messageAdapter);
-                                messageAdapter.setClickListener(MainActivity.this);
-                                if (messageAdapter != null && setFilter != null) messageAdapter.getFilter().filter(setFilter);
+                                // Set to adapter when same size
+                                if (jsonObjectArrayList4.size() == size) {
+                                    messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
+                                    rvMessage.setAdapter(messageAdapter);
+                                    messageAdapter.setClickListener(MainActivity.this);
+                                    if (messageAdapter != null && setFilter != null) messageAdapter.getFilter().filter(setFilter);
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

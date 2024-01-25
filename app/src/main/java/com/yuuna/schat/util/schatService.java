@@ -71,7 +71,7 @@ public class schatService extends Service {
                         JSONObject jsonObject = new JSONObject(response);
                         if (jsonObject.getBoolean("status")) {
                             JSONArray jsonArray = jsonObject.getJSONArray("messages");
-                            for (int i = 0; i < jsonArray.length(); i++) checkChat(jsonArray.getJSONObject(i).getString("id"), jsonArray.getJSONObject(i).getInt("send"));
+                            for (int i = 0; i < jsonArray.length(); i++) checkChat(setKey, jsonArray.getJSONObject(i).getString("id"), jsonArray.getJSONObject(i).getInt("send"));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -88,8 +88,8 @@ public class schatService extends Service {
         }
     }
 
-    private void checkChat(String id, Integer send) {
-        String check_chat = "{\"request\":\"check_chat\",\"data\":{\"id\":\""+id+"\",\"send\":\""+send+"\"}}";
+    private void checkChat(String setKey, String id, Integer send) {
+        String check_chat = "{\"request\":\"check_chat\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\",\"send\":\""+send+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(check_chat).getAsJsonObject();
         try {
             new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {

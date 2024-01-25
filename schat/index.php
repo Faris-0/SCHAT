@@ -33,8 +33,8 @@ if ($req == "register") {
     $username = $data['username'];
     $password = md5(md5($data['password'], true));
     $time = time();
-    $key = md5(md5($username."+".$password."+".$time, true));
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
+    $key = md5(md5($username . "+" . $password . "+" . $time, true));
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username` = '$username'");
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => false, "message" => "Username has been taken!");
         echo json_encode($response);
@@ -62,7 +62,7 @@ if ($req == "register") {
 if ($req == "login") {
     $username = $data['username'];
     $password = md5(md5($data['password'], true));
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username' AND `password`='$password'");
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username` = '$username' AND `password` = '$password'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "key" => $object->key, "name" => $object->name, "photo" => $object->photo, "message" => "Login Success!");
@@ -83,7 +83,7 @@ if ($req == "login") {
 //
 if ($req == "profile") {
     $key = $data['key'];
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `key`='$key'");
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `key` = '$key'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "name" => $object->name, "photo" => $object->photo, "bio" => $object->bio, "private" => $object->private);
@@ -106,12 +106,12 @@ if ($req == "profile") {
 if ($req == "add_contact") {
     $key = $data['key'];
     $username = $data['username'];
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username` = '$username'");
     if (mysqli_affected_rows($conn) == 0) {
         $response = array("status" => false, "message" => "Username Not Found!");
         echo json_encode($response);
     } else {
-        $query = mysqli_query($conn, "SELECT * FROM `contact` WHERE `key`='$key' AND `username`='$username'");
+        $query = mysqli_query($conn, "SELECT * FROM `contact` WHERE `key` = '$key' AND `username` = '$username'");
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => false, "message" => "Username Already Added!");
             echo json_encode($response);
@@ -138,7 +138,7 @@ if ($req == "add_contact") {
 //
 if ($req == "contact") {
     $key = $data['key'];
-    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo` FROM `contact`, `user` WHERE `contact`.`username`=`user`.`username` AND `contact`.`key`='$key'");
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo` FROM `contact`, `user` WHERE `contact`.`username` = `user`.`username` AND `contact`.`key` = '$key'");
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
@@ -162,17 +162,17 @@ if ($req == "contact") {
 if ($req == "add_message") {
     $key = $data['key'];
     $username = $data['username'];
-    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username`='$username'");
+    $query = mysqli_query($conn, "SELECT * FROM `user` WHERE `username` = '$username'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $id1 = md5(md5($key."+".$object->key, true));
-        $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id`='$id1'");
+        $id1 = md5(md5($key . "+" . $object->key, true));
+        $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id` = '$id1'");
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => true, "id" => $id1);
             echo json_encode($response);
         } else {
-            $id2 = md5(md5($object->key."+".$key, true));
-            $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id`='$id2'");
+            $id2 = md5(md5($object->key . "+" . $key, true));
+            $query = mysqli_query($conn, "SELECT * FROM `message` WHERE `id` = '$id2'");
             if (mysqli_affected_rows($conn)) {
                 $response = array("status" => true, "id" => $id2);
                 echo json_encode($response);
@@ -200,7 +200,7 @@ if ($req == "add_message") {
 //
 if ($req == "message") {
     $key = $data['key'];
-    $query = mysqli_query($conn, "SELECT `message`.`id`, `message`.`send`, `message`.`time` FROM `message` WHERE `message`.`key`='$key' AND `message`.`open`='1'");
+    $query = mysqli_query($conn, "SELECT `id`, `send`, `time` FROM `message` WHERE `key` = '$key' AND `open` = '1'");
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
@@ -224,10 +224,10 @@ if ($req == "message") {
 if ($req == "message_detail") {
     $key = $data['key'];
     $id = $data['id'];
-    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo`, `user`.`last_online`, `user`.`private` FROM `message`, `user` WHERE `message`.`key`=`user`.`key` AND `message`.`id`='$id' AND `message`.`key`!='$key'");
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`username`, `user`.`photo`, `user`.`last_online`, `user`.`private` FROM `message`, `user` WHERE `message`.`key` = `user`.`key` AND `message`.`id` = '$id' AND `message`.`key` != '$key'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `message_detail`.`id`='$id'");
+        $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `id` = '$id'");
         $rows = array();
         while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
         if (mysqli_affected_rows($conn)) {
@@ -253,7 +253,7 @@ if ($req == "message_detail") {
 if ($req == "sender") {
     $key = $data['key'];
     $id = $data['id'];
-    $query = mysqli_query($conn, "SELECT `message`.`send` FROM `message` WHERE `message`.`id`='$id' AND `message`.`key`='$key'");
+    $query = mysqli_query($conn, "SELECT `send` FROM `message` WHERE `id` = '$id' AND `key` = '$key'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
         $response = array("status" => true, "send" => $object->send);
@@ -274,7 +274,7 @@ if ($req == "sender") {
 //
 if ($req == "chats") {
     $id = $data['id'];
-    $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `message_detail`.`id`='$id'");
+    $query = mysqli_query($conn, "SELECT * FROM `message_detail` WHERE `id` = '$id'");
     $rows = array();
     while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
     if (mysqli_affected_rows($conn)) {
@@ -367,18 +367,20 @@ if ($req == "delete_chat") {
 // {
 //     "request" : "check_chat",
 //     "data" : {
+//         "key" : "",
 //         "id" : "",
 //         "send" : ""
 //     }
 // }
 //
 if ($req == "check_chat") {
+    $key = $data['key'];
     $id = $data['id'];
     $send = $data['send'];
-    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`photo`, `user`.`date_created` FROM `message`, `user` WHERE `message`.`key`=`user`.`key` AND `message`.`id`='$id'");
+    $query = mysqli_query($conn, "SELECT `user`.`name`, `user`.`photo`, `user`.`date_created` FROM `message`, `user` WHERE `message`.`key` = `user`.`key` AND `user`.`key` != '$key' AND `message`.`id` = '$id'");
     $object = mysqli_fetch_object($query);
     if (mysqli_affected_rows($conn)) {
-        $query = mysqli_query($conn, "SELECT `message_detail`.`chat`, `message_detail`.`time` FROM `message_detail` WHERE `message_detail`.`id`='$id' AND `message_detail`.`view`='0' AND `message_detail`.`send`!='$send'");
+        $query = mysqli_query($conn, "SELECT `chat`, `time` FROM `message_detail` WHERE `id` = '$id' AND `view` = '0' AND `send` != '$send'");
         $rows = array();
         while($r = mysqli_fetch_assoc($query)) $rows[] = $r;
         if (mysqli_affected_rows($conn)) {
@@ -448,8 +450,8 @@ if ($req == "edit_bio") {
 if ($req == "edit_photo") {
     $key = $data['key'];
     $photo = $data['photo'];
-    $sphoto = 'SCHAT-' . $key . ".jpeg";
-    $path = './photo/' . $sphoto;
+    $sphoto = "SCHAT-" . $key . ".jpeg";
+    $path = "./photo/" . $sphoto;
     file_put_contents($path, base64_decode($photo));
     $query = mysqli_query($conn, "UPDATE `user` SET `photo` = '$sphoto' WHERE `key` = '$key'");
 } else

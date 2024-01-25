@@ -97,7 +97,7 @@ public class SettingActivity extends Activity {
         });
         findViewById(R.id.sBName).setOnClickListener(v -> editDialog("Name"));
         findViewById(R.id.sBBio).setOnClickListener(v -> editDialog("Bio"));
-        sHide.setOnCheckedChangeListener((compoundButton, b) -> setPrivate(b));
+        sHide.setOnCheckedChangeListener((compoundButton, b) -> setPrivate(!b));
         findViewById(R.id.sBSignOut).setOnClickListener(v -> {
             try {
                 for (int i = 0; i < jsonObjectArrayList.size(); i++) {
@@ -304,7 +304,7 @@ public class SettingActivity extends Activity {
                                 bio = jsonObject.getString("bio");
                                 if (!bio.equals("")) tvABio.setText(bio);
 
-                                if (jsonObject.getInt("private") == 1) sHide.setChecked(true);
+                                if (jsonObject.getInt("private") == 0) sHide.setChecked(true);
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             e.printStackTrace();
