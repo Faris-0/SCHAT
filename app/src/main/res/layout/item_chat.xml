@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/cl1"
-    android:gravity="end"
-    android:layout_margin="@dimen/_4sdp">
+    android:layout_margin="@dimen/_4sdp"
+    android:gravity="end">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -23,7 +23,7 @@
 
             <TextView
                 android:id="@+id/cChat"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.1"
                 android:text="Ini adalah pesan yang kita kirim"

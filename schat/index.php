@@ -298,7 +298,7 @@ if ($req == "chats") {
 //
 if ($req == "send_chat") {
     $id = $data['id'];
-    $chat = $data['chat'];
+    $chat = rtrim($data['chat'], "\n");
     $send = $data['send'];
     $time = time();
     $query = mysqli_query($conn, "INSERT INTO `message_detail` (`id`, `chat`, `send`, `time`) VALUES ('$id', '$chat', '$send', '$time')");

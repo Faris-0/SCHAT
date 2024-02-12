@@ -88,17 +88,6 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
 
         id = getIntent().getStringExtra("id");
         send = getIntent().getIntExtra("send", 0);
-        setKey = getSharedPreferences(SCHAT, MODE_PRIVATE).getString(TAG_KEY, "");
-
-        loadPhoto();
-
-        refresh = () -> {
-            loadProfile();
-            loadChat();
-            setView();
-            handler.postDelayed(refresh, 10000); // 1000 == 1sec
-        };
-        handler.post(refresh);
     }
 
     private void setView() {
@@ -183,7 +172,10 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
                                 chatAdapter.setClickListener(ChatActivity.this);
 
                                 // Auto Scroll to Bottom
-                                if (!isBottom) if (jsonObjectArrayList.size() != 0) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
+                                if (!isBottom) {
+                                    if (jsonObjectArrayList.size() != 0) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
+                                    llDown.setVisibility(View.GONE);
+                                }
                                 isBottom = true;
                             }
                         } catch (JSONException e) {
@@ -284,6 +276,21 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setKey = getSharedPreferences(SCHAT, MODE_PRIVATE).getString(TAG_KEY, "");
+
+        loadPhoto();
+        refresh = () -> {
+            loadProfile();
+            loadChat();
+            setView();
+            handler.postDelayed(refresh, 10000); // 1000 == 1sec
+        };
+        handler.post(refresh);
     }
 
     @Override
