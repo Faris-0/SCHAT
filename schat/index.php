@@ -39,7 +39,7 @@ if ($req == "register") {
         $response = array("status" => false, "message" => "Username has been taken!");
         echo json_encode($response);
     } else {
-        $query = mysqli_query($conn, "INSERT INTO `user` (`key`, `name`, `username`, `password`, `date_created`) VALUES ('$key', '$name', '$username', '$password', '$time')");
+        $query = mysqli_query($conn, "INSERT INTO `user` (`key`, `name`, `username`, `password`, `photo`, `bio`, `last_online`, `private`, `date_created`) VALUES ('$key', '$name', '$username', '$password', '', '', '$time', '0', '$time')");
         if (mysqli_affected_rows($conn)) {
             $response = array("status" => true, "key" => $key, "name" => $name, "message" => "Register Success!");
             echo json_encode($response);
@@ -451,6 +451,7 @@ if ($req == "edit_photo") {
     $key = $data['key'];
     $photo = $data['photo'];
     $sphoto = "SCHAT-" . $key . ".jpeg";
+    is_dir("photo") ? null : mkdir("photo");
     $path = "./photo/" . $sphoto;
     file_put_contents($path, base64_decode($photo));
     $query = mysqli_query($conn, "UPDATE `user` SET `photo` = '$sphoto' WHERE `key` = '$key'");
