@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.yuuna.schat"
-        minSdk 21
+        minSdk 24
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"

@@ -51,8 +51,8 @@ public class schatService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         refresh = () -> {
             String setKey = getSharedPreferences(SCHAT, Context.MODE_PRIVATE).getString(TAG_KEY, "");
-            if (!setKey.equals("") && !isLastOnline) saveLastOnline(setKey);
-            if (!setKey.equals("")) checkMessage(setKey);
+            if (!setKey.isEmpty() && !isLastOnline) saveLastOnline(setKey);
+            if (!setKey.isEmpty()) checkMessage(setKey);
             handler.postDelayed(refresh, 10000); // 1000 == 1sec
         };
         handler.post(refresh);
@@ -101,19 +101,14 @@ public class schatService extends Service {
                         if (jsonObject.getBoolean("status")) {
                             JSONArray jsonArray = jsonObject.getJSONArray("messages");
                             ArrayList<JSONObject> jsonObjectArrayList = new ArrayList<>();
-//                            for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
-//                            JSONObject object = new JSONObject();
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject object = new JSONObject().put("name", jsonObject.getString("name"))
                                         .put("chat", jsonArray.getJSONObject(i).getString("chat"))
                                         .put("time", jsonArray.getJSONObject(i).getString("time"));
                                 jsonObjectArrayList.add(object);
                             }
-//                            String name = jsonObject.getString("name");
-//                            String photo = jsonObject.getString("photo");
                             Integer sender = jsonObject.getInt("date_created");
-//                            if (jsonObjectArrayList.size() != 0) notification(getApplicationContext(), name, id, send, sender, jsonObjectArrayList, false);
-                            if (jsonObjectArrayList.size() != 0) notification(getApplicationContext(), id, send, sender, jsonObjectArrayList, false);
+                            if (!jsonObjectArrayList.isEmpty()) notification(getApplicationContext(), id, send, sender, jsonObjectArrayList, false);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -150,7 +145,6 @@ public class schatService extends Service {
         }
     }
 
-//    public static void notification(Context context, String name, String id, Integer send, Integer sender, ArrayList<JSONObject> jsonObjectArrayList, Boolean isRemove) {
     public static void notification(Context context, String id, Integer send, Integer sender, ArrayList<JSONObject> jsonObjectArrayList, Boolean isRemove) {
         if (isRemove) {
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;

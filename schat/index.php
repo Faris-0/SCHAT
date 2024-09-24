@@ -177,7 +177,7 @@ if ($req == "add_message") {
                 $response = array("status" => true, "id" => $id2);
                 echo json_encode($response);
             } else {
-                $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`, `send`) VALUES ('$key', '$id1', '0', '0'), ('$object->key', '$id1', '0', '1')");
+                $query = mysqli_query($conn, "INSERT INTO `message` (`key`, `id`, `open`, `send`, `time`) VALUES ('$key', '$id1', '0', '0', '0'), ('$object->key', '$id1', '0', '1', '0')");
                 if (mysqli_affected_rows($conn)) {
                     $response = array("status" => true, "id" => $id1);
                     echo json_encode($response);
@@ -301,7 +301,7 @@ if ($req == "send_chat") {
     $chat = rtrim($data['chat'], "\n");
     $send = $data['send'];
     $time = time();
-    $query = mysqli_query($conn, "INSERT INTO `message_detail` (`id`, `chat`, `send`, `time`) VALUES ('$id', '$chat', '$send', '$time')");
+    $query = mysqli_query($conn, "INSERT INTO `message_detail` (`id`, `chat`, `send`, `time`, `view`) VALUES ('$id', '$chat', '$send', '$time', '0')");
     if (mysqli_affected_rows($conn)) {
         $query = mysqli_query($conn, "UPDATE `message` SET `open` = '1', `time` = '$time' WHERE `id` = '$id'");
         if (mysqli_affected_rows($conn)) {

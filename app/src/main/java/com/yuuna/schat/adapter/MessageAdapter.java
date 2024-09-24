@@ -61,8 +61,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.Holder> 
             } else holder.ivView.setVisibility(View.GONE);
             holder.tvContent.setText(listMessage.get(position).getString("last_chat"));
             Long lTime = jsonObjectDataList.get(position).getLong("last_time");
-            String sTime = new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L));
-            holder.tvTime.setText(sTime);
+            holder.tvTime.setText(new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L)));
         } catch (JSONException e) {
             e.printStackTrace();
         }

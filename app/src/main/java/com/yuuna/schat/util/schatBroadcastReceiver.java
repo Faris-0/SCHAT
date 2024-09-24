@@ -107,8 +107,6 @@ public class schatBroadcastReceiver extends BroadcastReceiver {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
-//                                if (intent.getAction().equals("READ")) notification(context, null, null, null, sender, null, true);
-//                                else if (intent.getAction().equals("REPLY")) notification(context, "Anda", id, send, sender, jsonObjectArrayList, false);
                                 if (intent.getAction().equals("READ")) notification(context, null, null, sender, null, true);
                                 else if (intent.getAction().equals("REPLY")) notification(context, id, send, sender, jsonObjectArrayList, false);
                             }
@@ -129,8 +127,7 @@ public class schatBroadcastReceiver extends BroadcastReceiver {
 
         private CharSequence getMessageText(Intent intent) {
             Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-            if (remoteInput != null) return remoteInput.getCharSequence("key_text_reply");
-            return "";
+            return remoteInput != null ? remoteInput.getCharSequence("key_text_reply") : "";
         }
 
         @Override

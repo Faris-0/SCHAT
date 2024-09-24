@@ -63,7 +63,7 @@ public class SettingActivity extends Activity {
     private ArrayList<JSONObject> jsonObjectArrayList;
 
     private String setKey, setName, bio, dataAcc;
-    private Integer TAG_GALLERY = 2, limitText = 0;;
+    private Integer TAG_GALLERY = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +103,7 @@ public class SettingActivity extends Activity {
                 for (int i = 0; i < jsonObjectArrayList.size(); i++) {
                     if (jsonObjectArrayList.get(i).getString("key").equals(setKey)) jsonObjectArrayList.remove(i);
                 }
-                if (jsonObjectArrayList.size() != 0) {
+                if (!jsonObjectArrayList.isEmpty()) {
                     spSCHAT.edit()
                             .putString(TAG_KEY, jsonObjectArrayList.get(0).getString("key"))
                             .putString(TAG_NAME, jsonObjectArrayList.get(0).getString("name"))
@@ -121,7 +121,7 @@ public class SettingActivity extends Activity {
         setName = spSCHAT.getString(TAG_NAME, "");
 
         tvName.setText(setName);
-        if (!setName.equals("")) tvAName.setText(setName);
+        if (!setName.isEmpty()) tvAName.setText(setName);
 
         profile();
         loadAcc();
@@ -155,7 +155,7 @@ public class SettingActivity extends Activity {
         dataAcc = spSCHAT.getString(TAG_ACC, "");
         try {
             jsonObjectArrayList = new ArrayList<>();
-            if (!dataAcc.equals("")) {
+            if (!dataAcc.isEmpty()) {
                 JSONArray jsonArray = new JSONArray(dataAcc);
                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
             }
@@ -174,19 +174,10 @@ public class SettingActivity extends Activity {
         TextView tvLimit = dEdit.findViewById(R.id.eLimit);
         TextView tvTitle = dEdit.findViewById(R.id.eTitle);
 
-        if (edit.equals("Name")) {
-            limitText = 25;
-            etText.setText(setName);
-            etText.setHint("Name");
-            tvLimit.setText(String.valueOf(limitText - setName.length()));
-            tvTitle.setText("Edit Name");
-        } else if (edit.equals("Bio")) {
-            limitText = 70;
-            etText.setText(bio);
-            etText.setHint("Bio");
-            tvLimit.setText(String.valueOf(limitText - bio.length()));
-            tvTitle.setText("Edit Bio");
-        }
+        etText.setText(edit.equals("Name") ? setName : bio);
+        etText.setHint(edit.equals("Name") ? "Name" : "Bio");
+        tvLimit.setText(String.valueOf((edit.equals("Name") ? 25 : 70) - setName.length()));
+        tvTitle.setText(edit.equals("Name") ? "Edit Name" : "Edit Bio");
 
         etText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -201,16 +192,13 @@ public class SettingActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                tvLimit.setText(String.valueOf(limitText - editable.length()));
+                tvLimit.setText(String.valueOf((edit.equals("Name") ? 25 : 70) - editable.length()));
             }
         });
 
         dEdit.findViewById(R.id.eBack).setOnClickListener(v -> dEdit.dismiss());
 
-        dEdit.findViewById(R.id.eSave).setOnClickListener(v -> {
-            if (edit.equals("Name")) saveAccount(etText.getText().toString(), true);
-            else if (edit.equals("Bio")) saveAccount(etText.getText().toString(), false);
-        });
+        dEdit.findViewById(R.id.eSave).setOnClickListener(v -> saveAccount(etText.getText().toString(), edit.equals("Name")));
 
         dEdit.show();
     }
@@ -230,7 +218,7 @@ public class SettingActivity extends Activity {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject.getBoolean("status")) {
                                 if (b) {
-                                    if (!nb.equals("")) {
+                                    if (!nb.isEmpty()) {
                                         setName = nb;
                                         tvName.setText(nb);
                                         tvAName.setText(nb);
@@ -258,7 +246,7 @@ public class SettingActivity extends Activity {
                                     });
                                     spSCHAT.edit().putString(TAG_NAME, nb).putString(TAG_ACC, String.valueOf(jsonObjectArrayList)).commit();
                                 } else {
-                                    if (!nb.equals("")) {
+                                    if (!nb.isEmpty()) {
                                         bio = nb;
                                         tvABio.setText(nb);
                                     } else tvABio.setText("Empty");
@@ -302,9 +290,9 @@ public class SettingActivity extends Activity {
                                         .into(civPhoto);
 
                                 bio = jsonObject.getString("bio");
-                                if (!bio.equals("")) tvABio.setText(bio);
+                                if (!bio.isEmpty()) tvABio.setText(bio);
 
-                                if (jsonObject.getInt("private") == 0) sHide.setChecked(true);
+                                sHide.setChecked(jsonObject.getInt("private") == 0);
                             } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             e.printStackTrace();

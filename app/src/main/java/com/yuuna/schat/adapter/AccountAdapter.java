@@ -52,8 +52,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
         String key = mContext.getSharedPreferences(SCHAT, Context.MODE_PRIVATE).getString(TAG_KEY, "");
         try {
             profile(jsonObjectDataList.get(position).getString("key"), holder.civPhoto);
-            if (key.equals(jsonObjectDataList.get(position).getString("key"))) holder.ivSelect.setVisibility(View.VISIBLE);
-            else holder.ivSelect.setVisibility(View.GONE);
+            holder.ivSelect.setVisibility(key.equals(jsonObjectDataList.get(position).getString("key")) ? View.VISIBLE : View.GONE);
             holder.tvName.setText(jsonObjectDataList.get(position).getString("name"));
         } catch (JSONException e) {
             e.printStackTrace();

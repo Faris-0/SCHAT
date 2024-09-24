@@ -42,19 +42,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.Holder> implem
         try {
             holder.tvChat.setText(listChat.get(position).getString("chat"));
             Long lTime = listChat.get(position).getLong("time");
-            String sTime = new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L));
-            holder.tvTime.setText(sTime);
-            if (listChat.get(position).getInt("view") == 0) holder.ivView.setImageResource(R.drawable.ic_check);
-            else holder.ivView.setImageResource(R.drawable.ic_double_check);
-            if (send == listChat.get(position).getInt("send")) {
-                holder.ll1.setScaleX(1);
-                holder.ll2.setScaleX(1);
-                holder.ivView.setVisibility(View.VISIBLE);
-            } else {
-                holder.ll1.setScaleX(-1);
-                holder.ll2.setScaleX(-1);
-                holder.ivView.setVisibility(View.GONE);
-            }
+            holder.tvTime.setText(new SimpleDateFormat("HH:mm").format(new Date(lTime * 1000L)));
+            holder.ivView.setImageResource(listChat.get(position).getInt("view") == 0 ? R.drawable.ic_check : R.drawable.ic_double_check);
+            holder.ll1.setScaleX(send == listChat.get(position).getInt("send") ? 1 : -1);
+            holder.ll2.setScaleX(send == listChat.get(position).getInt("send") ? 1 : -1);
+            holder.ivView.setVisibility(send == listChat.get(position).getInt("send") ? View.VISIBLE : View.GONE);
         } catch (JSONException e) {
             e.printStackTrace();
         }

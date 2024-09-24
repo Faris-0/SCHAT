@@ -122,8 +122,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             public void afterTextChanged(Editable editable) {
                 setFilter = String.valueOf(editable);
                 if (messageAdapter != null) messageAdapter.getFilter().filter(setFilter);
-                if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
-                else llClear.setVisibility(View.VISIBLE);
+                llClear.setVisibility(editable.toString().isEmpty() ? View.GONE : View.VISIBLE);
             }
         });
 
@@ -174,8 +173,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
             @Override
             public void afterTextChanged(Editable editable) {
                 if (contactAdapter != null) contactAdapter.getFilter().filter(editable);
-                if (editable.toString().equals("")) llClear.setVisibility(View.GONE);
-                else llClear.setVisibility(View.VISIBLE);
+                llClear.setVisibility(editable.toString().isEmpty() ? View.GONE : View.VISIBLE);
             }
         });
 
@@ -265,25 +263,17 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         dMenu.findViewById(R.id.mClose).setOnClickListener(v -> dMenu.dismiss());
 
         dMenu.findViewById(R.id.mAccount).setOnClickListener(v -> {
-            if (isAccount) {
-                dMenu.findViewById(R.id.ma).setRotation(0);
-                dMenu.findViewById(R.id.maSub).setAlpha(1);
-                dMenu.findViewById(R.id.maSub).setVisibility(View.GONE);
-                dMenu.findViewById(R.id.maSub).animate().alpha(0).setDuration(500);
-                isAccount = false;
-            } else {
-                dMenu.findViewById(R.id.ma).setRotation(90);
-                dMenu.findViewById(R.id.maSub).setAlpha(0);
-                dMenu.findViewById(R.id.maSub).setVisibility(View.VISIBLE);
-                dMenu.findViewById(R.id.maSub).animate().alpha(1).setDuration(500);
-                isAccount = true;
-            }
+            dMenu.findViewById(R.id.ma).setRotation(isAccount ? 0 : 90);
+            dMenu.findViewById(R.id.maSub).setAlpha(isAccount ? 1 : 0);
+            dMenu.findViewById(R.id.maSub).setVisibility(isAccount ? View.GONE : View.VISIBLE);
+            dMenu.findViewById(R.id.maSub).animate().alpha(isAccount ? 0 : 1).setDuration(500);
+            isAccount = !isAccount;
         });
         
         dMenu.findViewById(R.id.maSub2).setOnClickListener(v -> sign());
 
         dMenu.findViewById(R.id.mSetting).setOnClickListener(v -> {
-            if (setKey != null || !setKey.equals("")) {
+            if (setKey != null || !setKey.isEmpty()) {
                 dMenu.dismiss();
                 startActivity(new Intent(context, SettingActivity.class));
             }
@@ -481,7 +471,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
         dataAcc = spSCHAT.getString(TAG_ACC, "");
         try {
             jsonObjectArrayList = new ArrayList<>();
-            if (!dataAcc.equals("")) {
+            if (!dataAcc.isEmpty()) {
                 JSONArray jsonArray = new JSONArray(dataAcc);
                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList.add(jsonArray.getJSONObject(i));
             }
@@ -626,7 +616,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
         if (!isSign) sign();
         loadAcc();
-        if (!setKey.equals("")) loadContact();
+        if (!setKey.isEmpty()) loadContact();
         refresh = () -> {
             loadMessage();
             handler.postDelayed(refresh, 10000); // 1000 == 1sec
@@ -657,7 +647,7 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                                 jsonObjectArrayList3 = new ArrayList<>();
                                 for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList3.add(jsonArray.getJSONObject(i));
                                 jsonObjectArrayList4 = new ArrayList<>();
-                                if (jsonObjectArrayList3.size() == 0) {
+                                if (jsonObjectArrayList3.isEmpty()) {
                                     // Set to Adapter from Data Account
                                     messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
                                     rvMessage.setAdapter(messageAdapter);

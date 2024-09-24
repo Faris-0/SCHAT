@@ -63,7 +63,7 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
 
         findViewById(R.id.cBack).setOnClickListener(v -> onBackPressed());
         llDown.setOnClickListener(v -> {
-            if (jsonObjectArrayList.size() != 0) {
+            if (!jsonObjectArrayList.isEmpty()) {
                 rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
                 llDown.setVisibility(View.GONE);
             }
@@ -77,11 +77,8 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                switch (newState) {
-                    case RecyclerView.SCROLL_STATE_IDLE:
-                        if (!rvChats.canScrollVertically(1)) llDown.setVisibility(View.GONE);
-                        else llDown.setVisibility(View.VISIBLE);
-                        break;
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    llDown.setVisibility(!rvChats.canScrollVertically(1) ? View.GONE : View.VISIBLE);
                 }
             }
         });
@@ -173,7 +170,7 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
 
                                 // Auto Scroll to Bottom
                                 if (!isBottom) {
-                                    if (jsonObjectArrayList.size() != 0) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
+                                    if (!jsonObjectArrayList.isEmpty()) rvChats.scrollToPosition(jsonObjectArrayList.size() - 1);
                                     llDown.setVisibility(View.GONE);
                                 }
                                 isBottom = true;
@@ -193,8 +190,7 @@ public class ChatActivity extends Activity implements ChatAdapter.ItemClickListe
             e.printStackTrace();
         }
         // If you have a new chat, a scroll down will appear
-        if (!rvChats.canScrollVertically(1)) llDown.setVisibility(View.GONE);
-        else llDown.setVisibility(View.VISIBLE);
+        llDown.setVisibility(!rvChats.canScrollVertically(1) ? View.GONE : View.VISIBLE);
     }
 
     private void sendChat() {
