@@ -1,5 +1,6 @@
 package com.yuuna.schat.ui;
 
+import static com.bumptech.glide.load.resource.bitmap.TransformationUtils.rotateImage;
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.AppConstants.SCHAT;
@@ -15,9 +16,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -31,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -236,7 +241,7 @@ public class SettingActivity extends Activity {
                                     jsonObjectArrayList.add(new JSONObject()
                                                     .put("number", number + 1)
                                                     .put("key", setKey).put("name", nb));
-                                    Collections.sort(jsonObjectArrayList, (a, b) -> {
+                                    jsonObjectArrayList.sort((a, b) -> {
                                         try {
                                             return a.getInt("number") - b.getInt("number");
                                         } catch (JSONException e) {
@@ -337,7 +342,22 @@ public class SettingActivity extends Activity {
         if (resultCode == RESULT_OK && requestCode == TAG_GALLERY) {
             try {
                 Bitmap bGallery = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                // Get Real Path
+                Uri selectedImage = data.getData();
+                String[] filePathColumn = { MediaStore.Images.Media.DATA };
+                Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+                cursor.moveToFirst();
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String picturePath = cursor.getString(columnIndex);
+                cursor.close();
+                // Get Rotation in Degrees
+                ExifInterface exif = new ExifInterface(picturePath);
+                int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                int rotationInDegrees = exifToDegrees(rotation);
+                // Rotate Image
+                bGallery = rotateImage(bGallery, rotationInDegrees);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                // Compress Image
                 bGallery.compress(Bitmap.CompressFormat.JPEG, 50, stream);
                 byte[] bytes = stream.toByteArray();
                 if (bytes.length/1024 > 1024) {
@@ -351,6 +371,13 @@ public class SettingActivity extends Activity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private int exifToDegrees(int exifOrientation ) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) return 90;
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) return 180;
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) return 270;
+        return 0;
     }
 
     private void sendPhoto(String sphoto) {
