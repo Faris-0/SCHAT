@@ -25,6 +25,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -125,13 +127,31 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
                 llClear.setVisibility(editable.toString().isEmpty() ? View.GONE : View.VISIBLE);
             }
         });
+        etFind.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                if (messageAdapter != null) messageAdapter.getFilter().filter(setFilter);
+                llClear.setVisibility(setFilter.isEmpty() ? View.GONE : View.VISIBLE);
+                // Hide Keyboard
+                hideKeyboard();
+                return true;
+            }
+            return false;
+        });
 
         llClear.setOnClickListener(v -> clearSearch());
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(etFind.getWindowToken(), 0);
+        etFind.clearFocus();
     }
 
     private void closeSearch() {
         llToolbar.setVisibility(View.VISIBLE);
         llFind.setVisibility(View.GONE);
+        // Hide Keyboard
+        hideKeyboard();
         // Clear SearchBar
         clearSearch();
     }
