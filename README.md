@@ -1,5 +1,4 @@
 # SCHAT
-Android - Simple Chat
 
 ### Introduction
 
