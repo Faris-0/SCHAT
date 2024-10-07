@@ -8,6 +8,7 @@ This Simple Chat app is based on the open source.
 ```
 - Universal: runs any android version (tested on Android 10 and 14).
 - Device rotation and all orientations.
+- Sign-in, sign-out, sign-up, messaging, display notifications when there are new messages without opening the application, see other users status (offline or online), hide online status and other users cannot see if their messages are read
 ```
 
 ### Current Issues
