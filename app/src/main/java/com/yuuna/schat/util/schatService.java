@@ -62,87 +62,75 @@ public class schatService extends Service {
     private void checkMessage(String setKey) {
         String check_message = "{\"request\":\"message\",\"data\":{\"key\":\""+setKey+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(check_message).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    // Response
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        if (jsonObject.getBoolean("status")) {
-                            JSONArray jsonArray = jsonObject.getJSONArray("messages");
-                            for (int i = 0; i < jsonArray.length(); i++) checkChat(setKey, jsonArray.getJSONObject(i).getString("id"), jsonArray.getJSONObject(i).getInt("send"));
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+        new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                // Response
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    if (jsonObject.getBoolean("status")) {
+                        JSONArray jsonArray = jsonObject.getJSONArray("messages");
+                        for (int i = 0; i < jsonArray.length(); i++) checkChat(setKey, jsonArray.getJSONObject(i).getString("id"), jsonArray.getJSONObject(i).getInt("send"));
                     }
-                }
-
-                @Override
-                public void onFailure(IOException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            }
+
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void checkChat(String setKey, String id, Integer send) {
         String check_chat = "{\"request\":\"check_chat\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\",\"send\":\""+send+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(check_chat).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    // Response
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        if (jsonObject.getBoolean("status")) {
-                            JSONArray jsonArray = jsonObject.getJSONArray("messages");
-                            ArrayList<JSONObject> jsonObjectArrayList = new ArrayList<>();
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject object = new JSONObject().put("name", jsonObject.getString("name"))
-                                        .put("chat", jsonArray.getJSONObject(i).getString("chat"))
-                                        .put("time", jsonArray.getJSONObject(i).getString("time"));
-                                jsonObjectArrayList.add(object);
-                            }
-                            Integer sender = jsonObject.getInt("date_created");
-                            if (!jsonObjectArrayList.isEmpty()) notification(getApplicationContext(), id, send, sender, jsonObjectArrayList, false);
+        new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                // Response
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    if (jsonObject.getBoolean("status")) {
+                        JSONArray jsonArray = jsonObject.getJSONArray("messages");
+                        ArrayList<JSONObject> jsonObjectArrayList = new ArrayList<>();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject object = new JSONObject().put("name", jsonObject.getString("name"))
+                                    .put("chat", jsonArray.getJSONObject(i).getString("chat"))
+                                    .put("time", jsonArray.getJSONObject(i).getString("time"));
+                            jsonObjectArrayList.add(object);
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        Integer sender = jsonObject.getInt("date_created");
+                        if (!jsonObjectArrayList.isEmpty()) notification(getApplicationContext(), id, send, sender, jsonObjectArrayList, false);
                     }
-                }
-
-                @Override
-                public void onFailure(IOException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            }
+
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void saveLastOnline(String setKey) {
         String last_online = "{\"request\":\"edit_last_online\",\"data\":{\"key\":\""+setKey+"\",\"last_online\":\""+(System.currentTimeMillis()/1000)+"\"}}";
         JsonObject jsonObject = JsonParser.parseString(last_online).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
+        new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
 
-                }
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public static void notification(Context context, String id, Integer send, Integer sender, ArrayList<JSONObject> jsonObjectArrayList, Boolean isRemove) {

@@ -1,5 +1,6 @@
 package com.yuuna.schat.adapter;
 
+import static com.yuuna.schat.util.AppConstants.payload;
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.AppConstants.TAG_KEY;
@@ -60,39 +61,35 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.Holder> 
     }
 
     private void profile(String key, CircleImageView civPhoto) {
-        String profile = "{\"request\":\"profile\",\"data\":{\"key\":\""+key+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(profile).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    ((Activity) mContext).runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                String photo = BASE_PHOTO + jsonObject.getString("photo");
-                                if (!photo.equals(BASE_PHOTO)) Glide.with(mContext)
-                                        .load(photo)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                        .skipMemoryCache(true)
-                                        .into(civPhoto);
-                                else civPhoto.setImageResource(R.drawable.photo);
-                            } else Toast.makeText(mContext, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+        JsonObject data = new JsonObject();
+        data.addProperty("key", key);
+        new Client().getOkHttpClient(BASE_URL, payload("profile", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                ((Activity) mContext).runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            String photo = BASE_PHOTO + jsonObject.getString("photo");
+                            if (!photo.equals(BASE_PHOTO)) Glide.with(mContext)
+                                    .load(photo)
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(true)
+                                    .into(civPhoto);
+                            else civPhoto.setImageResource(R.drawable.photo);
+                        } else Toast.makeText(mContext, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

@@ -74,55 +74,47 @@ public class schatBroadcastReceiver extends BroadcastReceiver {
         private void sendChat(String message, String id, Integer send, Integer sender, ArrayList<JSONObject> jsonObjectArrayList) {
             String send_chat = "{\"request\":\"send_chat\",\"data\":{\"id\":\""+id+"\",\"chat\":\""+message+"\",\"send\":\""+send+"\"}}";
             JsonObject jsonObject = JsonParser.parseString(send_chat).getAsJsonObject();
-            try {
-                new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                    @Override
-                    public void onSuccess(String response) {
-                        // Response
-                        try {
-                            if (new JSONObject(response).getBoolean("status")) setView(id, send, sender, jsonObjectArrayList);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(IOException e) {
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    // Response
+                    try {
+                        if (new JSONObject(response).getBoolean("status")) setView(id, send, sender, jsonObjectArrayList);
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
         private void setView(String id, Integer send, Integer sender, ArrayList<JSONObject> jsonObjectArrayList) {
             String message_detail = "{\"request\":\"edit_view\",\"data\":{\"id\":\""+id+"\",\"send\":\""+send+"\"}}";
             JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
-            try {
-                new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                    @Override
-                    public void onSuccess(String response) {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                if (intent.getAction().equals("READ")) notification(context, null, null, sender, null, true);
-                                else if (intent.getAction().equals("REPLY")) notification(context, id, send, sender, jsonObjectArrayList, false);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
+                @Override
+                public void onSuccess(String response) {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            if (intent.getAction().equals("READ")) notification(context, null, null, sender, null, true);
+                            else if (intent.getAction().equals("REPLY")) notification(context, id, send, sender, jsonObjectArrayList, false);
                         }
-                    }
-
-                    @Override
-                    public void onFailure(IOException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
         private CharSequence getMessageText(Intent intent) {

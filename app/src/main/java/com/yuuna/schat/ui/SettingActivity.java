@@ -1,6 +1,7 @@
 package com.yuuna.schat.ui;
 
 import static com.bumptech.glide.load.resource.bitmap.TransformationUtils.rotateImage;
+import static com.yuuna.schat.util.AppConstants.payload;
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.AppConstants.SCHAT;
@@ -133,26 +134,20 @@ public class SettingActivity extends Activity {
     }
 
     private void setPrivate(boolean isPrivate) {
-        Integer iPrivate;
-        if (isPrivate) iPrivate = 1;
-        else iPrivate = 0;
-        String last_online = "{\"request\":\"edit_private\",\"data\":{\"key\":\""+setKey+"\",\"private\":\""+iPrivate+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(last_online).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty("private", isPrivate ? 1 : 0);
+        new Client().getOkHttpClient(BASE_URL, payload("edit_private", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
 
-                }
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void loadAcc() {
@@ -209,110 +204,101 @@ public class SettingActivity extends Activity {
     }
 
     private void saveAccount(String nb, boolean b) {
-        String namebio;
-        if (b) namebio = "{\"request\":\"edit_name\",\"data\":{\"key\":\""+setKey+"\",\"name\":\""+nb+"\"}}";
-        else namebio = "{\"request\":\"edit_bio\",\"data\":{\"key\":\""+setKey+"\",\"bio\":\""+nb+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(namebio).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                if (b) {
-                                    if (!nb.isEmpty()) {
-                                        setName = nb;
-                                        tvName.setText(nb);
-                                        tvAName.setText(nb);
-                                    } else {
-                                        tvName.setText("");
-                                        tvAName.setText("Empty");
-                                    }
-                                    Integer number = 0;
-                                    for (int i = 0; i < jsonObjectArrayList.size(); i++) {
-                                        if (jsonObjectArrayList.get(i).getString("key").equals(setKey)) {
-                                            number = i;
-                                            jsonObjectArrayList.remove(i);
-                                        }
-                                    }
-                                    jsonObjectArrayList.add(new JSONObject()
-                                                    .put("number", number + 1)
-                                                    .put("key", setKey).put("name", nb));
-                                    jsonObjectArrayList.sort((a, b) -> {
-                                        try {
-                                            return a.getInt("number") - b.getInt("number");
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                            return 0;
-                                        }
-                                    });
-                                    spSCHAT.edit().putString(TAG_NAME, nb).putString(TAG_ACC, String.valueOf(jsonObjectArrayList)).commit();
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty(b ? "name" : "bio", nb);
+        new Client().getOkHttpClient(BASE_URL, payload(b ? "edit_name" : "edit_bio", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            if (b) {
+                                if (!nb.isEmpty()) {
+                                    setName = nb;
+                                    tvName.setText(nb);
+                                    tvAName.setText(nb);
                                 } else {
-                                    if (!nb.isEmpty()) {
-                                        bio = nb;
-                                        tvABio.setText(nb);
-                                    } else tvABio.setText("Empty");
+                                    tvName.setText("");
+                                    tvAName.setText("Empty");
                                 }
-                                dEdit.dismiss();
-                                Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                                Integer number = 0;
+                                for (int i = 0; i < jsonObjectArrayList.size(); i++) {
+                                    if (jsonObjectArrayList.get(i).getString("key").equals(setKey)) {
+                                        number = i;
+                                        jsonObjectArrayList.remove(i);
+                                    }
+                                }
+                                jsonObjectArrayList.add(new JSONObject()
+                                        .put("number", number + 1)
+                                        .put("key", setKey).put("name", nb));
+                                jsonObjectArrayList.sort((a, b) -> {
+                                    try {
+                                        return a.getInt("number") - b.getInt("number");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        return 0;
+                                    }
+                                });
+                                spSCHAT.edit().putString(TAG_NAME, nb).putString(TAG_ACC, String.valueOf(jsonObjectArrayList)).commit();
+                            } else {
+                                if (!nb.isEmpty()) {
+                                    bio = nb;
+                                    tvABio.setText(nb);
+                                } else tvABio.setText("Empty");
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            dEdit.dismiss();
+                            Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
                         }
-                    });
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void profile() {
-        String add_contact = "{\"request\":\"profile\",\"data\":{\"key\":\""+setKey+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                String photo = BASE_PHOTO + jsonObject.getString("photo");
-                                if (!photo.equals(BASE_PHOTO)) Glide.with(context)
-                                        .load(photo)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                        .skipMemoryCache(true)
-                                        .into(civPhoto);
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        new Client().getOkHttpClient(BASE_URL, payload("profile", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            String photo = BASE_PHOTO + jsonObject.getString("photo");
+                            if (!photo.equals(BASE_PHOTO)) Glide.with(context)
+                                    .load(photo)
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(true)
+                                    .into(civPhoto);
 
-                                bio = jsonObject.getString("bio");
-                                if (!bio.isEmpty()) tvABio.setText(bio);
+                            bio = jsonObject.getString("bio");
+                            if (!bio.isEmpty()) tvABio.setText(bio);
 
-                                sHide.setChecked(jsonObject.getInt("private") == 0);
-                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+                            sHide.setChecked(jsonObject.getInt("private") == 0);
+                        } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -381,22 +367,19 @@ public class SettingActivity extends Activity {
     }
 
     private void sendPhoto(String sphoto) {
-        String sendphoto = "{\"request\":\"edit_photo\",\"data\":{\"key\":\""+setKey+"\",\"photo\":\""+sphoto+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(sendphoto).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> profile());
-                }
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty("photo", sphoto);
+        new Client().getOkHttpClient(BASE_URL, payload("edit_photo", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> profile());
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

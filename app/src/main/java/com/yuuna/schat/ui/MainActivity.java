@@ -1,6 +1,7 @@
 package com.yuuna.schat.ui;
 
 import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static com.yuuna.schat.util.AppConstants.payload;
 import static com.yuuna.schat.util.Client.BASE_PHOTO;
 import static com.yuuna.schat.util.Client.BASE_URL;
 import static com.yuuna.schat.util.AppConstants.TAG_ACC;
@@ -227,35 +228,32 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void addcontact(String username) {
-        String add_contact = "{\"request\":\"add_contact\",\"data\":{\"key\":\""+setKey+"\",\"username\":\""+username+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                                loadContact();
-                                dAddContact.dismiss();
-                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty("username", username);
+        new Client().getOkHttpClient(BASE_URL, payload("add_contact", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                            loadContact();
+                            dAddContact.dismiss();
+                        } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void menuDialog() {
@@ -303,38 +301,34 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void profile(CircleImageView civPhoto) {
-        String profile = "{\"request\":\"profile\",\"data\":{\"key\":\""+setKey+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(profile).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                String photo = BASE_PHOTO + jsonObject.getString("photo");
-                                if (!photo.equals(BASE_PHOTO)) Glide.with(context)
-                                        .load(photo)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                        .skipMemoryCache(true)
-                                        .into(civPhoto);
-                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        new Client().getOkHttpClient(BASE_URL, payload("profile", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            String photo = BASE_PHOTO + jsonObject.getString("photo");
+                            if (!photo.equals(BASE_PHOTO)) Glide.with(context)
+                                    .load(photo)
+                                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                    .skipMemoryCache(true)
+                                    .into(civPhoto);
+                        } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void sign() {
@@ -427,63 +421,67 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
 
     private void logreg(String name, String username, String password, Boolean isLogReg) {
         String LogReg;
-        if (isLogReg) LogReg = "{\"request\":\"login\",\"data\":{\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
-        else LogReg = "{\"request\":\"register\",\"data\":{\"name\":\""+name+"\",\"username\":\""+username+"\",\"password\":\""+password+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(LogReg).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                Boolean isYour = false;
-                                for (JSONObject object : jsonObjectArrayList) {
-                                    if (jsonObject.getString("key").equals(object.getString("key"))) isYour = true;
-                                }
-                                if (!isYour) {
-                                    isSign = true;
-                                    // Set New Key
-                                    setKey = jsonObject.getString("key");
-                                    setName = jsonObject.getString("name");
-                                    // Add Data JSON
-                                    jsonObjectArrayList.add(new JSONObject()
-                                                    .put("number", jsonObjectArrayList.size() + 1)
-                                                    .put("key", setKey).put("name", setName));
-                                    // Save Data
-                                    spSCHAT.edit()
-                                            .putBoolean(TAG_SIGN, isSign)
-                                            .putString(TAG_KEY, setKey)
-                                            .putString(TAG_NAME, setName)
-                                            .putString(TAG_ACC, String.valueOf(jsonObjectArrayList))
-                                            .commit();
-                                    // Load Contact
-                                    loadContact();
-                                    // Load Message
-                                    loadMessage();
-                                    dSign.dismiss();
-                                    Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                                } else Toast.makeText(context, "You're already logged in", Toast.LENGTH_SHORT).show();
-                            } else {
-                                if (jsonObject.getString("message").equals("Username has been taken!")) etUsername.setTextColor(Color.RED);
-                                Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+        JsonObject data = new JsonObject();
+        if (isLogReg) {
+            data.addProperty("username", username);
+            data.addProperty("password", password);
+            LogReg = payload("login", data);
+        } else {
+            data.addProperty("name", name);
+            data.addProperty("username", username);
+            data.addProperty("password", password);
+            LogReg = payload("register", data);
         }
+        new Client().getOkHttpClient(BASE_URL, LogReg, new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            Boolean isYour = false;
+                            for (JSONObject object : jsonObjectArrayList) {
+                                if (jsonObject.getString("key").equals(object.getString("key"))) isYour = true;
+                            }
+                            if (!isYour) {
+                                isSign = true;
+                                // Set New Key
+                                setKey = jsonObject.getString("key");
+                                setName = jsonObject.getString("name");
+                                // Add Data JSON
+                                jsonObjectArrayList.add(new JSONObject()
+                                        .put("number", jsonObjectArrayList.size() + 1)
+                                        .put("key", setKey).put("name", setName));
+                                // Save Data
+                                spSCHAT.edit()
+                                        .putBoolean(TAG_SIGN, isSign)
+                                        .putString(TAG_KEY, setKey)
+                                        .putString(TAG_NAME, setName)
+                                        .putString(TAG_ACC, String.valueOf(jsonObjectArrayList))
+                                        .commit();
+                                // Load Contact
+                                loadContact();
+                                // Load Message
+                                loadMessage();
+                                dSign.dismiss();
+                                Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                            } else Toast.makeText(context, "You're already logged in", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (jsonObject.getString("message").equals("Username has been taken!")) etUsername.setTextColor(Color.RED);
+                            Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void loadAcc() {
@@ -501,35 +499,31 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void loadContact() {
-        String add_contact = "{\"request\":\"contact\",\"data\":{\"key\":\""+setKey+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(add_contact).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                JSONArray jsonArray = jsonObject.getJSONArray("contacts");
-                                jsonObjectArrayList2 = new ArrayList<>();
-                                for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList2.add(jsonArray.getJSONObject(i));
-                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        new Client().getOkHttpClient(BASE_URL, payload("contact", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            JSONArray jsonArray = jsonObject.getJSONArray("contacts");
+                            jsonObjectArrayList2 = new ArrayList<>();
+                            for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList2.add(jsonArray.getJSONObject(i));
+                        } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -559,69 +553,63 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void loadSend(String id) {
-        String sender = "{\"request\":\"sender\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(sender).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                Integer send = jsonObject.getInt("send");
-                                startActivity(new Intent(context, ChatActivity.class)
-                                        .putExtra("id", id)
-                                        .putExtra("send", send)
-                                );
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty("id", id);
+        new Client().getOkHttpClient(BASE_URL, payload("sender", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            Integer send = jsonObject.getInt("send");
+                            startActivity(new Intent(context, ChatActivity.class)
+                                    .putExtra("id", id)
+                                    .putExtra("send", send)
+                            );
                         }
-                    });
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void createMessage(String username) {
-        String add_message = "{\"request\":\"add_message\",\"data\":{\"key\":\""+setKey+"\",\"username\":\""+username+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(add_message).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                // Open Chat
-                                loadSend(jsonObject.getString("id"));
-                                dContact.dismiss();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty("username", username);
+        new Client().getOkHttpClient(BASE_URL, payload("add_message", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            // Open Chat
+                            loadSend(jsonObject.getString("id"));
+                            dContact.dismiss();
                         }
-                    });
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -652,107 +640,100 @@ public class MainActivity extends Activity implements AccountAdapter.ItemClickLi
     }
 
     private void loadMessage() {
-        String message = "{\"request\":\"message\",\"data\":{\"key\":\""+setKey+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                JSONArray jsonArray = jsonObject.getJSONArray("messages");
-                                jsonObjectArrayList3 = new ArrayList<>();
-                                for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList3.add(jsonArray.getJSONObject(i));
-                                jsonObjectArrayList4 = new ArrayList<>();
-                                if (jsonObjectArrayList3.isEmpty()) {
-                                    // Set to Adapter from Data Account
-                                    messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
-                                    rvMessage.setAdapter(messageAdapter);
-                                    messageAdapter.setClickListener(MainActivity.this);
-                                } else {
-                                    for (int i = 0; i < jsonObjectArrayList3.size(); i++) {
-                                        String id = jsonObjectArrayList3.get(i).getString("id");
-                                        Integer send = jsonObjectArrayList3.get(i).getInt("send");
-                                        Integer time = jsonObjectArrayList3.get(i).getInt("time");
-                                        loadMessageDetail(id, send, time, jsonObjectArrayList3.size());
-                                    }
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        new Client().getOkHttpClient(BASE_URL, payload("message", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            JSONArray jsonArray = jsonObject.getJSONArray("messages");
+                            jsonObjectArrayList3 = new ArrayList<>();
+                            for (int i = 0; i < jsonArray.length(); i++) jsonObjectArrayList3.add(jsonArray.getJSONObject(i));
+                            jsonObjectArrayList4 = new ArrayList<>();
+                            if (jsonObjectArrayList3.isEmpty()) {
+                                // Set to Adapter from Data Account
+                                messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
+                                rvMessage.setAdapter(messageAdapter);
+                                messageAdapter.setClickListener(MainActivity.this);
+                            } else {
+                                for (int i = 0; i < jsonObjectArrayList3.size(); i++) {
+                                    String id = jsonObjectArrayList3.get(i).getString("id");
+                                    Integer send = jsonObjectArrayList3.get(i).getInt("send");
+                                    Integer time = jsonObjectArrayList3.get(i).getInt("time");
+                                    loadMessageDetail(id, send, time, jsonObjectArrayList3.size());
                                 }
-                            } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
+                            }
+                        } else Toast.makeText(context, jsonObject.getString("message"), Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void loadMessageDetail(String id, Integer send, Integer time, Integer size) {
-        String message_detail = "{\"request\":\"message_detail\",\"data\":{\"key\":\""+setKey+"\",\"id\":\""+id+"\"}}";
-        JsonObject jsonObject = JsonParser.parseString(message_detail).getAsJsonObject();
-        try {
-            new Client().getOkHttpClient(BASE_URL, String.valueOf(jsonObject), new Client.OKHttpNetwork() {
-                @Override
-                public void onSuccess(String response) {
-                    runOnUiThread(() -> {
-                        // Response
-                        try {
-                            JSONObject jsonObject = new JSONObject(response);
-                            if (jsonObject.getBoolean("status")) {
-                                String who;
-                                if (send != jsonObject.getInt("last_send")) who = "YOU";
-                                else if (send == jsonObject.getInt("last_send")) who = "ME";
-                                else who = "";
-                                JSONObject object = new JSONObject()
-                                        .put("id", id)
-                                        .put("name", jsonObject.getString("name"))
-                                        .put("username", jsonObject.getString("name"))
-                                        .put("photo", jsonObject.getString("photo"))
-                                        .put("last_send", who)
-                                        .put("last_chat", jsonObject.getString("last_chat"))
-                                        .put("last_time", time)
-                                        .put("last_view", jsonObject.getInt("last_view"));
-                                jsonObjectArrayList4.add(object);
-                                // Sort by last_time
-                                Collections.sort(jsonObjectArrayList4, (a, b) -> {
-                                    try {
-                                        return b.getInt("last_time") - a.getInt("last_time");
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        return 0;
-                                    }
-                                });
-                                // Set to adapter when same size
-                                if (jsonObjectArrayList4.size() == size) {
-                                    messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
-                                    rvMessage.setAdapter(messageAdapter);
-                                    messageAdapter.setClickListener(MainActivity.this);
-                                    if (messageAdapter != null && setFilter != null) messageAdapter.getFilter().filter(setFilter);
+        JsonObject data = new JsonObject();
+        data.addProperty("key", setKey);
+        data.addProperty("id", id);
+        new Client().getOkHttpClient(BASE_URL, payload("message_detail", data), new Client.OKHttpNetwork() {
+            @Override
+            public void onSuccess(String response) {
+                runOnUiThread(() -> {
+                    // Response
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        if (jsonObject.getBoolean("status")) {
+                            String who;
+                            if (send != jsonObject.getInt("last_send")) who = "YOU";
+                            else if (send == jsonObject.getInt("last_send")) who = "ME";
+                            else who = "";
+                            JSONObject object = new JSONObject()
+                                    .put("id", id)
+                                    .put("name", jsonObject.getString("name"))
+                                    .put("username", jsonObject.getString("name"))
+                                    .put("photo", jsonObject.getString("photo"))
+                                    .put("last_send", who)
+                                    .put("last_chat", jsonObject.getString("last_chat"))
+                                    .put("last_time", time)
+                                    .put("last_view", jsonObject.getInt("last_view"));
+                            jsonObjectArrayList4.add(object);
+                            // Sort by last_time
+                            Collections.sort(jsonObjectArrayList4, (a, b) -> {
+                                try {
+                                    return b.getInt("last_time") - a.getInt("last_time");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    return 0;
                                 }
+                            });
+                            // Set to adapter when same size
+                            if (jsonObjectArrayList4.size() == size) {
+                                messageAdapter = new MessageAdapter(jsonObjectArrayList4, context);
+                                rvMessage.setAdapter(messageAdapter);
+                                messageAdapter.setClickListener(MainActivity.this);
+                                if (messageAdapter != null && setFilter != null) messageAdapter.getFilter().filter(setFilter);
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
-                    });
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
 
-                @Override
-                public void onFailure(IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
